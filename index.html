@@ -4,19 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Déclarations Dépôts — Verre Plat</title>
-
-<!-- Google Identity Services (OAuth2 officiel Google) -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<!-- SheetJS pour export Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- jsPDF pour export PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
 <style>
-/* ══════════════════════════════════════════════════════
-   RESET & VARIABLES
-   ══════════════════════════════════════════════════════ */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0F1923;--surface:#1A2535;--surface2:#0D2137;
@@ -25,168 +16,104 @@
   --texte:#ECF0F1;--texte2:#8FA3B1;--bord:#2C3E50;
   --lp:#1E2D3D;--li:#162030;--rayon:14px;--rayon-sm:8px;
 }
-html,body{
-  background:var(--bg);color:var(--texte);
-  font-family:'Segoe UI',system-ui,sans-serif;
-  font-size:14px;min-height:100vh;
-  -webkit-tap-highlight-color:transparent;
-}
+html,body{background:var(--bg);color:var(--texte);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh;-webkit-tap-highlight-color:transparent}
 
-/* ══════════════════════════════════════════════════════
-   ÉCRAN DE CONNEXION
-   ══════════════════════════════════════════════════════ */
+/* ══ ÉCRAN CONNEXION ══════════════════════════════════ */
 #ecran-connexion{
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  min-height:100vh;padding:24px;
-  background:radial-gradient(ellipse at 50% 0%, #0D2137 0%, #0F1923 70%);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:100vh;padding:24px;
+  background:radial-gradient(ellipse at 50% 0%,#0D2137 0%,#0F1923 70%);
 }
 .login-card{
-  background:var(--surface);
-  border:1px solid var(--bord);
-  border-top:3px solid var(--cyan);
-  border-radius:var(--rayon);
-  padding:36px 28px;
-  width:100%;max-width:400px;
-  text-align:center;
+  background:var(--surface);border:1px solid var(--bord);
+  border-top:3px solid var(--cyan);border-radius:var(--rayon);
+  padding:32px 24px;width:100%;max-width:380px;text-align:center;
   box-shadow:0 20px 60px rgba(0,0,0,.5);
 }
-.login-logo{font-size:52px;margin-bottom:12px;display:block}
-.login-titre{font-size:20px;font-weight:800;color:var(--texte);margin-bottom:4px}
-.login-sous{font-size:12px;color:var(--texte2);margin-bottom:32px}
+.login-logo{font-size:50px;margin-bottom:10px;display:block}
+.login-titre{font-size:20px;font-weight:800;margin-bottom:4px}
+.login-sous{font-size:12px;color:var(--texte2);margin-bottom:28px}
 
-/* Bouton Google officiel stylé */
-.btn-google{
-  width:100%;padding:14px 20px;
-  background:#fff;color:#1f1f1f;
-  border:none;border-radius:var(--rayon-sm);
-  font-size:14px;font-weight:600;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:12px;
-  transition:all .2s;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);
-}
-.btn-google:hover{background:#f5f5f5;box-shadow:0 4px 16px rgba(0,0,0,.4);transform:translateY(-1px)}
-.btn-google:active{transform:scale(.98)}
-.btn-google svg{width:20px;height:20px;flex-shrink:0}
-
-.login-sep{
-  display:flex;align-items:center;gap:12px;
-  margin:20px 0;color:var(--texte2);font-size:11px;
-}
-.login-sep::before,.login-sep::after{
-  content:'';flex:1;height:1px;background:var(--bord);
+/* Badge TEST */
+.badge-test{
+  display:inline-block;background:#3d2800;color:var(--ambre);
+  border:1px solid var(--ambre);border-radius:20px;
+  font-size:10px;font-weight:700;padding:3px 10px;
+  margin-bottom:20px;letter-spacing:.5px;
 }
 
-/* Champ email manuel (alternative) */
-.login-label{
-  display:block;font-size:10px;font-weight:700;
-  color:var(--texte2);text-transform:uppercase;
-  letter-spacing:.8px;margin-bottom:6px;text-align:left;
-}
+/* Champ email */
+.login-label{display:block;font-size:10px;font-weight:700;color:var(--texte2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;text-align:left}
 .login-input{
-  width:100%;padding:12px 14px;
-  background:var(--bg);border:1px solid var(--bord);
-  border-radius:var(--rayon-sm);
-  color:var(--texte);font-size:13px;
-  transition:border-color .2s;margin-bottom:10px;
+  width:100%;padding:13px 14px;background:var(--bg);
+  border:1px solid var(--bord);border-radius:var(--rayon-sm);
+  color:var(--texte);font-size:14px;transition:border-color .2s;
+  margin-bottom:6px;
 }
 .login-input:focus{outline:none;border-color:var(--cyan)}
+.login-input.erreur{border-color:var(--rouge);animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .login-input::placeholder{color:var(--texte2)}
-.login-input.erreur{border-color:var(--rouge)}
 
-/* Message d'erreur */
-.login-erreur{
-  display:none;
-  background:#3d1a1a;border:1px solid var(--rouge);
-  border-radius:var(--rayon-sm);
-  color:var(--rouge);font-size:12px;
-  padding:10px 14px;margin-bottom:12px;
-  text-align:left;
+/* Suggestion email test */
+.suggestion{
+  font-size:11px;color:var(--texte2);text-align:left;
+  margin-bottom:14px;padding:8px 12px;
+  background:rgba(91,196,217,.05);border:1px solid rgba(91,196,217,.15);
+  border-radius:var(--rayon-sm);cursor:pointer;transition:background .15s;
 }
-.login-erreur.vis{display:block}
+.suggestion:hover{background:rgba(91,196,217,.1)}
+.suggestion span{color:var(--cyan);font-weight:600}
 
-/* Bouton connexion manuelle */
+/* Message erreur / info */
+.login-msg{
+  display:none;border-radius:var(--rayon-sm);
+  font-size:12px;padding:10px 14px;
+  margin-bottom:12px;text-align:left;line-height:1.5;
+}
+.login-msg.erreur{display:block;background:#3d1a1a;border:1px solid var(--rouge);color:var(--rouge)}
+.login-msg.info{display:block;background:#3d2e0a;border:1px solid var(--ambre);color:var(--ambre)}
+.login-msg.succes{display:block;background:#0e3322;border:1px solid var(--vert);color:var(--vert)}
+
+/* Bouton connexion */
 .btn-connexion{
-  width:100%;padding:13px;
-  background:var(--bleu);color:#fff;
-  border:none;border-radius:var(--rayon-sm);
-  font-size:13px;font-weight:700;cursor:pointer;
-  transition:all .2s;display:flex;
-  align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;background:var(--bleu);color:#fff;
+  border:none;border-radius:var(--rayon-sm);font-size:14px;
+  font-weight:700;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:16px;
 }
-.btn-connexion:hover{background:#2480c0}
+.btn-connexion:hover{background:#2480c0;transform:translateY(-1px)}
 .btn-connexion:active{transform:scale(.98)}
-.btn-connexion:disabled{background:var(--texte2);cursor:not-allowed}
 
-/* Spinner chargement */
-.spinner{
-  width:18px;height:18px;
-  border:2px solid rgba(255,255,255,.3);
-  border-top-color:#fff;
-  border-radius:50%;
-  animation:spin .7s linear infinite;
-  display:none;
-}
-.btn-connexion.charge .spinner{display:block}
-.btn-connexion.charge .btn-txt{display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
+.login-note{font-size:10px;color:var(--texte2);line-height:1.6}
+.login-note strong{color:var(--ambre)}
 
-.login-note{
-  font-size:10px;color:var(--texte2);
-  margin-top:20px;line-height:1.6;
-}
-.login-note a{color:var(--cyan);text-decoration:none}
-
-/* ══════════════════════════════════════════════════════
-   APPLICATION PRINCIPALE (cachée jusqu'à connexion)
-   ══════════════════════════════════════════════════════ */
+/* ══ APPLICATION ══════════════════════════════════════ */
 #app{display:none}
 
-/* EN-TÊTE */
-header{
-  background:var(--surface2);border-bottom:3px solid var(--cyan);
-  padding:14px 16px 12px;position:sticky;top:0;z-index:100;
-}
+header{background:var(--surface2);border-bottom:3px solid var(--cyan);padding:12px 16px;position:sticky;top:0;z-index:100}
 .h-top{display:flex;align-items:center;gap:10px}
-.logo{font-size:24px;line-height:1}
-.h-titres h1{font-size:15px;font-weight:700;letter-spacing:.3px}
-.h-titres p{font-size:11px;color:var(--texte2);margin-top:1px}
-.h-droite{margin-left:auto;display:flex;align-items:center;gap:10px}
+.logo{font-size:22px}
+.h-titres h1{font-size:14px;font-weight:700}
+.h-titres p{font-size:10px;color:var(--texte2);margin-top:1px}
+.h-droite{margin-left:auto;display:flex;align-items:center;gap:8px}
+.user-badge{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--bord);border-radius:30px;padding:4px 10px 4px 4px}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:var(--bleu);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.user-nom{font-size:11px;font-weight:600;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge-mode{font-size:9px;padding:2px 7px;border-radius:20px;font-weight:700}
+.badge-mode.test{background:#3d2800;color:var(--ambre);border:1px solid var(--ambre)}
+.badge-mode.prod{background:#0e3322;color:var(--vert);border:1px solid var(--vert)}
+.btn-quitter{font-size:10px;color:var(--rouge);cursor:pointer;padding:3px 8px;border:1px solid var(--rouge);border-radius:20px;background:none;transition:all .15s}
+.btn-quitter:hover{background:var(--rouge);color:#fff}
 
-/* Avatar utilisateur connecté */
-.user-badge{
-  display:flex;align-items:center;gap:8px;
-  background:var(--surface);border:1px solid var(--bord);
-  border-radius:30px;padding:5px 12px 5px 5px;cursor:pointer;
-  transition:background .15s;
-}
-.user-badge:hover{background:#2c3e50}
-.user-avatar{
-  width:28px;height:28px;border-radius:50%;
-  background:var(--bleu);display:flex;
-  align-items:center;justify-content:center;
-  font-size:12px;font-weight:700;color:#fff;
-  overflow:hidden;
-}
-.user-avatar img{width:100%;height:100%;object-fit:cover}
-.user-nom{font-size:11px;font-weight:600;color:var(--texte);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.user-deconnexion{
-  font-size:10px;color:var(--rouge);cursor:pointer;
-  padding:2px 8px;border:1px solid var(--rouge);
-  border-radius:20px;transition:all .15s;white-space:nowrap;
-}
-.user-deconnexion:hover{background:var(--rouge);color:#fff}
-
-/* ONGLETS */
-.nav-tabs{display:flex;gap:6px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none}
+.nav-tabs{display:flex;gap:6px;padding:10px 16px 0;overflow-x:auto;scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
-.tab{flex:1;min-width:90px;padding:10px 6px;border:none;border-radius:var(--rayon) var(--rayon) 0 0;background:var(--surface);color:var(--texte2);font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+.tab{flex:1;min-width:85px;padding:9px 6px;border:none;border-radius:var(--rayon) var(--rayon) 0 0;background:var(--surface);color:var(--texte2);font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
 .tab.av{background:#1a3d2a;color:var(--vert);border-bottom-color:var(--vert)}
 .tab.ac{background:#3d1a1a;color:var(--rouge);border-bottom-color:var(--rouge)}
 .tab.at{background:#3d2e0a;color:var(--ambre);border-bottom-color:var(--ambre)}
 
-/* FILTRES */
 main{padding:0 16px 32px}
 .carte{background:var(--surface);border:1px solid var(--bord);border-top:none;border-radius:0 0 var(--rayon) var(--rayon);padding:14px;margin-bottom:14px}
 .fg{margin-bottom:10px}
@@ -197,16 +124,12 @@ select:focus,input[type=date]:focus{outline:2px solid var(--cyan);outline-offset
 .dates-range{display:none;gap:10px}
 .dates-range.vis{display:flex}
 .dates-range .fg{flex:1;margin-bottom:0}
-
-/* BOUTONS */
 .btn-row{display:flex;gap:10px;margin-top:6px;align-items:stretch}
 .btn{flex:1;padding:12px 8px;border:none;border-radius:var(--rayon-sm);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;color:#fff}
 .btn-generer{background:var(--bleu)}
 .btn-generer:hover{background:#2480c0}
-
-/* BOUTON EXPORT TOGGLE */
 .export-wrap{position:relative;flex:1}
-.btn-export{width:100%;height:100%;background:var(--rouge);border:none;border-radius:var(--rayon-sm);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 8px;transition:all .25s;position:relative}
+.btn-export{width:100%;height:100%;background:var(--rouge);border:none;border-radius:var(--rayon-sm);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 8px;transition:all .25s}
 .btn-export.actif{background:#c0392b;box-shadow:0 0 0 3px rgba(231,76,60,.4);border-radius:var(--rayon-sm) var(--rayon-sm) 0 0}
 .btn-export:hover{background:#c0392b}
 .btn-export .icone-export{transition:transform .25s}
@@ -215,43 +138,25 @@ select:focus,input[type=date]:focus{outline:2px solid var(--cyan);outline-offset
 .export-menu.vis{display:block;animation:slideDown .2s ease}
 @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 .export-menu-titre{font-size:10px;font-weight:700;color:var(--texte2);text-transform:uppercase;letter-spacing:.8px;padding:10px 14px 6px;border-bottom:1px solid var(--bord)}
-.export-option{width:100%;padding:13px 14px;border:none;background:transparent;color:var(--texte);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s;text-align:left}
+.export-option{width:100%;padding:12px 14px;border:none;background:transparent;color:var(--texte);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s;text-align:left}
 .export-option:hover{background:var(--bord)}
-.export-option .opt-ico{font-size:18px;width:26px;text-align:center}
+.export-option .opt-ico{font-size:16px;width:24px;text-align:center}
 .export-option .opt-txt{display:flex;flex-direction:column}
-.export-option .opt-titre{font-size:13px;font-weight:700}
+.export-option .opt-titre{font-size:12px;font-weight:700}
 .export-option .opt-desc{font-size:10px;color:var(--texte2);margin-top:1px}
 .export-option.excel .opt-titre{color:#1D6F42}
 .export-option.pdf .opt-titre{color:#E74C3C}
 .export-sep{height:1px;background:var(--bord)}
 
-/* CHARGEMENT */
-.chargement{
-  text-align:center;padding:44px 20px;color:var(--texte2);
-}
-.chargement-spinner{
-  width:36px;height:36px;
-  border:3px solid var(--bord);
-  border-top-color:var(--cyan);
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-  margin:0 auto 14px;
-}
-.chargement p{font-size:13px}
-
-/* STATS */
 .stats{display:none;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .sc{flex:1;min-width:70px;background:var(--surface);border:1px solid var(--bord);border-radius:var(--rayon-sm);padding:10px;text-align:center}
 .sv{font-size:18px;font-weight:800;color:var(--cyan);line-height:1}
 .sl{font-size:9px;color:var(--texte2);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
-
-/* COMPTEUR */
 .cpt{font-size:11px;color:var(--texte2);margin-bottom:8px;padding-left:2px}
 
-/* TABLEAU */
 .tw{overflow-x:auto;border-radius:var(--rayon);border:1px solid var(--bord);-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
-thead th{background:var(--surface2);color:var(--cyan);font-weight:700;padding:10px 12px;text-align:left;font-size:11px;letter-spacing:.3px;cursor:pointer;user-select:none;position:sticky;top:0}
+thead th{background:var(--surface2);color:var(--cyan);font-weight:700;padding:10px 12px;text-align:left;font-size:11px;cursor:pointer;user-select:none;position:sticky;top:0}
 thead th:hover{background:#142a3d}
 .si{margin-left:3px;opacity:.5;font-size:9px}
 th.tri-actif .si{opacity:1;color:#fff}
@@ -259,30 +164,33 @@ tbody tr:nth-child(even){background:var(--lp)}
 tbody tr:nth-child(odd){background:var(--li)}
 tbody tr.alerte{background:#2d1010}
 tbody tr.info{background:#0e2918}
-tbody tr:active{background:#2C4A6E}
 td{padding:9px 12px;color:var(--texte)}
-td.r{text-align:right;font-variant-numeric:tabular-nums}
+td.r{text-align:right}
 .bdg{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700}
 .br{background:#4d1a1a;color:var(--rouge)}
 .bv2{background:#0e3322;color:var(--vert)}
 .ba{background:#3d2800;color:var(--ambre)}
 
-/* VIDE */
 .vide{text-align:center;padding:44px 20px;color:var(--texte2)}
 .vide-i{font-size:36px;margin-bottom:10px}
 .vide p{font-size:13px}
 
-/* PIED */
-footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-top:1px solid var(--bord);margin-top:8px}
+/* Bannière mode en cours de dev */
+.banniere-dev{
+  background:#3d2800;border:1px solid var(--ambre);
+  border-radius:var(--rayon-sm);padding:10px 14px;
+  margin-bottom:14px;font-size:12px;color:var(--ambre);
+  display:none;line-height:1.5;
+}
+.banniere-dev.vis{display:block}
 
-/* TOAST */
+footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-top:1px solid var(--bord);margin-top:8px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2a;color:var(--vert);border:1px solid var(--vert);border-radius:var(--rayon);padding:11px 18px;font-size:12px;font-weight:600;z-index:9999;transition:transform .3s;white-space:nowrap;max-width:90vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0)}
-.toast.erreur{background:#3d1a1a;color:var(--rouge);border-color:var(--rouge)}
+.toast.err{background:#3d1a1a;color:var(--rouge);border-color:var(--rouge)}
 
-/* IMPRESSION */
 @media print{
-  header,.nav-tabs,.carte,.stats,.cpt,footer,.toast,#ecran-connexion{display:none!important}
+  header,.nav-tabs,.carte,.stats,.cpt,footer,.toast,#ecran-connexion,.banniere-dev{display:none!important}
   body{background:#fff;color:#000}
   .tw{border:none;overflow:visible}
   table{font-size:10px}
@@ -297,87 +205,66 @@ footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════
-     ÉCRAN DE CONNEXION
-     ══════════════════════════════════════════════════════ -->
+<!-- ══ ÉCRAN CONNEXION ════════════════════════════════ -->
 <div id="ecran-connexion">
   <div class="login-card">
-
-    <!-- Logo & Titre -->
     <span class="login-logo">🪟</span>
     <div class="login-titre">Déclarations Dépôts</div>
-    <div class="login-sous">Verre Plat · Gestion des déclarations</div>
+    <div class="login-sous">GPS Glass · Verre Plat</div>
 
-    <!-- Message d'erreur (caché par défaut) -->
-    <div class="login-erreur" id="login-erreur"></div>
+    <!-- Badge version test -->
+    <div class="badge-test">🧪 VERSION TEST — En développement</div>
 
-    <!-- ── BOUTON CONNEXION GOOGLE ────────────────────── -->
-    <button class="btn-google" id="btn-google" onclick="connexionGoogle()">
-      <!-- Logo Google SVG officiel -->
-      <svg viewBox="0 0 24 24">
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-      </svg>
-      Se connecter avec Google
-    </button>
+    <!-- Message erreur/info -->
+    <div class="login-msg" id="login-msg"></div>
 
-    <!-- Séparateur -->
-    <div class="login-sep">ou entrez votre email manuellement</div>
-
-    <!-- ── CONNEXION MANUELLE (Apps Script) ──────────── -->
-    <label class="login-label">Adresse email Gmail</label>
+    <!-- Champ email -->
+    <label class="login-label">📧 Votre adresse email</label>
     <input class="login-input" type="email" id="input-email"
-           placeholder="responsable@gmail.com"
+           placeholder="prenom.nom@gps-glass.com"
            autocomplete="email"
-           oninput="effacerErreur()">
+           oninput="effacerMsg()"
+           onkeydown="if(event.key==='Enter') seConnecter()">
 
-    <label class="login-label" style="margin-top:6px">URL Apps Script <span style="color:var(--texte2);font-weight:400;text-transform:none">(voir guide)</span></label>
-    <input class="login-input" type="url" id="input-script"
-           placeholder="https://script.google.com/macros/s/..."
-           oninput="effacerErreur()">
-
-    <button class="btn-connexion" id="btn-connexion" onclick="connexionManuelle()">
-      <div class="spinner"></div>
-      <span class="btn-txt">🔑 Se connecter</span>
-    </button>
-
-    <!-- Note d'aide -->
-    <div class="login-note">
-      🔒 Vos données restent dans votre Gmail.<br>
-      Aucun mot de passe n'est stocké par cette application.<br>
-      <a href="#" onclick="afficherGuide()">Comment obtenir mon URL Apps Script ?</a>
+    <!-- Suggestion rapide pour les tests -->
+    <div class="suggestion" onclick="utiliserEmailTest()">
+      🧪 Cliquez ici pour tester avec l'email de démonstration :<br>
+      <span>tafatkhaled901@gmail.com</span>
     </div>
 
+    <!-- Bouton connexion -->
+    <button class="btn-connexion" onclick="seConnecter()">
+      🔑 Accéder à mes déclarations
+    </button>
+
+    <div class="login-note">
+      🔒 Votre email est utilisé uniquement pour identifier votre espace.<br>
+      <strong>⚠️ Seul l'email de test fonctionne pour l'instant.</strong><br>
+      La connexion avec @gps-glass.com sera disponible prochainement.
+    </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     APPLICATION PRINCIPALE
-     ══════════════════════════════════════════════════════ -->
+<!-- ══ APPLICATION ════════════════════════════════════ -->
 <div id="app">
-
-  <!-- EN-TÊTE -->
   <header>
     <div class="h-top">
       <div class="logo">🪟</div>
       <div class="h-titres">
         <h1>Déclarations Dépôts</h1>
-        <p id="h-depot">Verre Plat</p>
+        <p id="h-email">GPS Glass · Verre Plat</p>
       </div>
       <div class="h-droite">
-        <!-- Badge utilisateur connecté -->
-        <div class="user-badge" title="Compte connecté">
+        <div class="user-badge">
           <div class="user-avatar" id="user-avatar">?</div>
           <span class="user-nom" id="user-nom">—</span>
+          <span class="badge-mode" id="badge-mode">TEST</span>
         </div>
-        <span class="user-deconnexion" onclick="deconnecter()">✕ Quitter</span>
+        <button class="btn-quitter" onclick="deconnecter()">✕ Quitter</button>
       </div>
     </div>
   </header>
 
-  <!-- ONGLETS -->
   <div class="nav-tabs">
     <button class="tab" data-t="vente"     onclick="changerType('vente')">🛒 Ventes</button>
     <button class="tab" data-t="casse"     onclick="changerType('casse')">⚠️ Casse</button>
@@ -385,7 +272,13 @@ footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-
   </div>
 
   <main>
-    <!-- FILTRES -->
+    <!-- Bannière mode développement -->
+    <div class="banniere-dev" id="banniere-dev">
+      🚧 <strong>Mode en développement</strong> — Vous êtes connecté avec
+      <strong id="banniere-email"></strong>.<br>
+      La connexion avec les emails @gps-glass.com sera disponible prochainement.
+    </div>
+
     <div class="carte">
       <div class="fg">
         <label class="fl">📅 Période</label>
@@ -411,45 +304,27 @@ footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-
             <div class="export-menu-titre">Choisir le format</div>
             <button class="export-option excel" onclick="exporterExcel()">
               <span class="opt-ico">📊</span>
-              <span class="opt-txt">
-                <span class="opt-titre">Excel (.xlsx)</span>
-                <span class="opt-desc">Télécharger le tableau Excel</span>
-              </span>
+              <span class="opt-txt"><span class="opt-titre">Excel (.xlsx)</span><span class="opt-desc">Télécharger le tableau Excel</span></span>
             </button>
             <div class="export-sep"></div>
             <button class="export-option pdf" onclick="exporterPDF()">
               <span class="opt-ico">📄</span>
-              <span class="opt-txt">
-                <span class="opt-titre">PDF — Télécharger</span>
-                <span class="opt-desc">Générer un fichier PDF</span>
-              </span>
+              <span class="opt-txt"><span class="opt-titre">PDF — Télécharger</span><span class="opt-desc">Générer un fichier PDF</span></span>
             </button>
             <div class="export-sep"></div>
             <button class="export-option pdf" onclick="imprimerPDF()">
               <span class="opt-ico">🖨️</span>
-              <span class="opt-txt">
-                <span class="opt-titre">PDF — Imprimer</span>
-                <span class="opt-desc">Ouvrir la boîte d'impression</span>
-              </span>
+              <span class="opt-txt"><span class="opt-titre">PDF — Imprimer</span><span class="opt-desc">Boîte d'impression</span></span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- STATS -->
     <div class="stats" id="stats"></div>
-
-    <!-- COMPTEUR -->
     <div class="cpt" id="cpt"></div>
+    <div id="pdf-header"><h2 id="pdf-titre"></h2><p id="pdf-sous-titre"></p></div>
 
-    <!-- EN-TÊTE PDF -->
-    <div id="pdf-header">
-      <h2 id="pdf-titre"></h2>
-      <p id="pdf-sous-titre"></p>
-    </div>
-
-    <!-- TABLEAU -->
     <div class="tw">
       <div class="vide" id="vide">
         <div class="vide-i">📋</div>
@@ -462,513 +337,248 @@ footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-
     </div>
   </main>
 
-  <footer id="footer-app">Déclarations Dépôts · Verre Plat</footer>
+  <footer id="footer-txt">GPS Glass · Déclarations Dépôts · Verre Plat</footer>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- ══════════════════════════════════════════════════════
-     JAVASCRIPT
-     ══════════════════════════════════════════════════════ -->
 <script>
-// ════════════════════════════════════════════════════════
-//  ⚙️  CONFIGURATION — À MODIFIER PAR L'ADMINISTRATEUR
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// EMAIL DE TEST (seul email fonctionnel pour l'instant)
+// ════════════════════════════════════════════════════
+const EMAIL_TEST = 'tafatkhaled901@gmail.com';
 
-/**
- * Remplacez cette valeur par votre Client ID Google Cloud.
- * Obtenez-le sur : console.cloud.google.com
- * → APIs & Services → Identifiants → Créer ID client OAuth2
- */
-const GOOGLE_CLIENT_ID = 'VOTRE_CLIENT_ID.apps.googleusercontent.com';
-
-/**
- * URL par défaut du Google Apps Script backend.
- * Chaque utilisateur peut avoir la sienne (stockée localement).
- */
-const SCRIPT_URL_PAR_DEFAUT = '';
-
-// ════════════════════════════════════════════════════════
-//  ÉTAT GLOBAL
-// ════════════════════════════════════════════════════════
-let utilisateur = {
-  email:     '',
-  nom:       '',
-  photo:     '',
-  scriptUrl: '',
-  token:     '',   // token OAuth2 Google (si connexion Google)
-  mode:      ''    // 'google' | 'script'
+// ════════════════════════════════════════════════════
+// DONNÉES RÉELLES extraites de tafatkhaled901@gmail.com
+// ════════════════════════════════════════════════════
+const DONNEES_TEST = {
+  casse: [
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",ref:"FL4-321/214", lot:"01125082534C",jetees:5, restantes:27,total:32},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082864C",jetees:15,restantes:1, total:16},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082851C",jetees:1, restantes:15,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082843C",jetees:1, restantes:15,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082852C",jetees:5, restantes:11,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL12-300/200",lot:"01125082782C",jetees:1, restantes:10,total:11},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082832C",jetees:6, restantes:10,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL12-300/200",lot:"01125082801C",jetees:13,restantes:0, total:13},
+    {date:"10/07/2026",dateISO:"2026-07-10",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082839C",jetees:13,restantes:3, total:16},
+    {date:"07/07/2026",dateISO:"2026-07-07",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082869C",jetees:4, restantes:12,total:16},
+  ],
+  vente: [
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL8-321/214", lot:"01125082849C",caisses:1,feuilles:16},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL4-321/214", lot:"01125082534C",caisses:1,feuilles:32},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL4-321/214", lot:"01125082531C",caisses:1,feuilles:32},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL8-321/214", lot:"01125082869C",caisses:1,feuilles:16},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"123456",        client:"Tivitec",ref:"FL8-321/214", lot:"01125082820C",caisses:1,feuilles:16},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"123456",        client:"Tivitec",ref:"FL4-321/214", lot:"01125082513C",caisses:1,feuilles:32},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"123456",        client:"Tivitec",ref:"FL12-300/200",lot:"01125082799C",caisses:1,feuilles:18},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"3467532",       client:"Tivitec",ref:"FL4-321/214", lot:"01125082533C",caisses:1,feuilles:32},
+    {date:"13/07/2026",dateISO:"2026-07-13",depot:"GPS Benicarlò",pedido:"11111111111111",client:"Samia",  ref:"FL12-300/200",lot:"01125082769C",caisses:1,feuilles:18},
+    {date:"13/07/2026",dateISO:"2026-07-13",depot:"GPS Benicarlò",pedido:"1234567890",    client:"Samia",  ref:"FL12-300/200",lot:"01125082769C",caisses:1,feuilles:18},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",pedido:"543268986",     client:"Rearg",  ref:"FL8-321/214", lot:"01125082864C",caisses:1,feuilles:1},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",pedido:"876544",        client:"Gjhz",   ref:"FL8-321/214", lot:"—",           caisses:1,feuilles:0},
+  ],
+  transfert: [
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",destination:"Alicante",feuilles:64},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",destination:"Alicanti",feuilles:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",destination:"Madride", feuilles:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",destination:"Ytree",   feuilles:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",destination:"Valenvia",feuilles:27},
+    {date:"10/07/2026",dateISO:"2026-07-10",depot:"GPS Benicarlò",destination:"Valencia",feuilles:91},
+    {date:"09/07/2026",dateISO:"2026-07-09",depot:"GPS Benicarlò",destination:"Alicante",feuilles:70},
+  ]
 };
 
-let typeActif  = null;
-let dfAffiche  = [];
-let sortKey    = null;
-let sortAsc    = true;
-let menuOuvert = false;
-
-// ════════════════════════════════════════════════════════
-//  CONFIG COLONNES
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// CONFIG COLONNES
+// ════════════════════════════════════════════════════
 const CFG = {
-  casse:    {
-    cols:["Date","Dépôt","Réf. Caisse","N° Lot","Feuilles Jetées","Feuilles Restantes","Total Initial"],
-    keys:["date","depot","ref","lot","jetees","restantes","total"],
-    nums:["jetees","restantes","total"]
-  },
-  vente:    {
-    cols:["Date","Dépôt","N° Commande","Client","Réf. Produit","N° Lot","Caisses","Feuilles"],
-    keys:["date","depot","pedido","client","ref","lot","caisses","feuilles"],
-    nums:["caisses","feuilles"]
-  },
-  transfert:{
-    cols:["Date","Dépôt Origine","Destination","Nbre Feuilles"],
-    keys:["date","depot","destination","feuilles"],
-    nums:["feuilles"]
-  },
+  casse:    {cols:["Date","Dépôt","Réf. Caisse","N° Lot","Feuilles Jetées","Feuilles Restantes","Total Initial"],keys:["date","depot","ref","lot","jetees","restantes","total"],nums:["jetees","restantes","total"]},
+  vente:    {cols:["Date","Dépôt","N° Commande","Client","Réf. Produit","N° Lot","Caisses","Feuilles"],keys:["date","depot","pedido","client","ref","lot","caisses","feuilles"],nums:["caisses","feuilles"]},
+  transfert:{cols:["Date","Dépôt Origine","Destination","Nbre Feuilles"],keys:["date","depot","destination","feuilles"],nums:["feuilles"]},
 };
-const LABELS = {
-  casse:    {emoji:"⚠️", nom:"Déclarations de Casse"},
-  vente:    {emoji:"🛒", nom:"Bons de Sortie Vente"},
-  transfert:{emoji:"🚚", nom:"Sorties de Stock"},
-};
+const LABELS={casse:{emoji:"⚠️",nom:"Déclarations de Casse"},vente:{emoji:"🛒",nom:"Bons de Sortie Vente"},transfert:{emoji:"🚚",nom:"Sorties de Stock"}};
 
-// ════════════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// ÉTAT
+// ════════════════════════════════════════════════════
+let emailConnecte = '';
+let modeTest      = false;
+let typeActif     = null;
+let dfAffiche     = [];
+let sortKey       = null;
+let sortAsc       = true;
+let menuOuvert    = false;
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
 window.onload = () => {
-  // Dates par défaut
-  const auj  = new Date();
-  const iso  = d => d.toISOString().slice(0,10);
-  const il30 = new Date(); il30.setDate(auj.getDate()-30);
+  const auj=new Date(), iso=d=>d.toISOString().slice(0,10);
+  const il30=new Date(); il30.setDate(auj.getDate()-30);
   document.getElementById('d-fin').value   = iso(auj);
   document.getElementById('d-debut').value = iso(il30);
-
-  // Fermer menu export si clic ailleurs
-  document.addEventListener('click', e => {
-    const wrap = document.getElementById('export-wrap-el');
-    if(wrap && !wrap.contains(e.target)) fermerMenuExport();
+  document.addEventListener('click',e=>{
+    if(!document.getElementById('export-wrap-el').contains(e.target)) fermerMenuExport();
   });
-
-  // Vérifier session sauvegardée
-  const sessionSauvee = sessionStorage.getItem('utilisateur');
-  if(sessionSauvee){
-    try{
-      utilisateur = JSON.parse(sessionSauvee);
-      demarrerApp();
-    } catch(e){ sessionStorage.clear(); }
-  }
-
-  // Pré-remplir URL script si mémorisée
-  const urlSauvee = localStorage.getItem('scriptUrl_' + (location.hostname));
-  if(urlSauvee) document.getElementById('input-script').value = urlSauvee;
+  // Session sauvegardée ?
+  const s = sessionStorage.getItem('email_connecte');
+  if(s){ emailConnecte=s; modeTest=(s===EMAIL_TEST); demarrerApp(); }
 };
 
-// ════════════════════════════════════════════════════════
-//  CONNEXION GOOGLE OAUTH2
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// CONNEXION
+// ════════════════════════════════════════════════════
 
-/**
- * Lance la connexion via Google Identity Services.
- * Demande accès en lecture aux emails Gmail de l'utilisateur.
- */
-function connexionGoogle(){
-  if(GOOGLE_CLIENT_ID === 'VOTRE_CLIENT_ID.apps.googleusercontent.com'){
-    afficherErreurLogin(
-      '⚙️ Client ID Google non configuré. ' +
-      'L\'administrateur doit enregistrer l\'application sur Google Cloud Console.'
-    );
-    return;
-  }
-
-  // Initialiser le client OAuth2 Google
-  const client = google.accounts.oauth2.initTokenClient({
-    client_id: GOOGLE_CLIENT_ID,
-    // Scopes : profil utilisateur + lecture Gmail
-    scope: 'https://www.googleapis.com/auth/userinfo.profile ' +
-           'https://www.googleapis.com/auth/userinfo.email ' +
-           'https://www.googleapis.com/auth/gmail.readonly',
-    callback: async (reponse) => {
-      if(reponse.error){
-        afficherErreurLogin('Connexion Google annulée ou échouée : ' + reponse.error);
-        return;
-      }
-      // Token obtenu — récupérer le profil utilisateur
-      await chargerProfilGoogle(reponse.access_token);
-    }
-  });
-  client.requestAccessToken();
+function utiliserEmailTest(){
+  document.getElementById('input-email').value = EMAIL_TEST;
+  effacerMsg();
 }
 
-/**
- * Récupère le profil de l'utilisateur connecté via l'API Google
- */
-async function chargerProfilGoogle(accessToken){
-  try{
-    const rep = await fetch(
-      'https://www.googleapis.com/oauth2/v2/userinfo',
-      { headers: { Authorization: 'Bearer ' + accessToken } }
-    );
-    const profil = await rep.json();
+function seConnecter(){
+  const email = document.getElementById('input-email').value.trim().toLowerCase();
 
-    utilisateur = {
-      email:     profil.email,
-      nom:       profil.name || profil.email.split('@')[0],
-      photo:     profil.picture || '',
-      token:     accessToken,
-      scriptUrl: '',
-      mode:      'google'
-    };
-
-    // Sauvegarder la session
-    sessionStorage.setItem('utilisateur', JSON.stringify(utilisateur));
-    demarrerApp();
-
-  } catch(err){
-    afficherErreurLogin('Impossible de récupérer le profil Google : ' + err.message);
-  }
-}
-
-// ════════════════════════════════════════════════════════
-//  CONNEXION MANUELLE (Apps Script)
-// ════════════════════════════════════════════════════════
-
-/**
- * Connexion via email + URL Apps Script personnelle.
- * L'Apps Script tourne sur le compte Google de l'utilisateur
- * et lit son Gmail à sa place.
- */
-async function connexionManuelle(){
-  const email     = document.getElementById('input-email').value.trim();
-  const scriptUrl = document.getElementById('input-script').value.trim();
-  const btn       = document.getElementById('btn-connexion');
-
-  // ── Validation ─────────────────────────────────────────
-  if(!email || !email.includes('@')){
-    afficherErreurLogin('Veuillez entrer une adresse email valide.');
+  // Validation format email
+  if(!email || !email.includes('@') || !email.includes('.')){
+    afficherMsg('⚠️ Veuillez entrer une adresse email valide.', 'erreur');
     document.getElementById('input-email').classList.add('erreur');
     return;
   }
-  if(!scriptUrl || !scriptUrl.startsWith('https://script.google.com')){
-    afficherErreurLogin(
-      'URL Apps Script invalide. Elle doit commencer par :\n' +
-      'https://script.google.com/macros/s/...'
-    );
-    document.getElementById('input-script').classList.add('erreur');
+
+  // ── Cas 1 : Email de test ─────────────────────────
+  if(email === EMAIL_TEST){
+    emailConnecte = email;
+    modeTest      = true;
+    sessionStorage.setItem('email_connecte', email);
+    demarrerApp();
     return;
   }
 
-  // ── État chargement ────────────────────────────────────
-  btn.classList.add('charge');
-  btn.disabled = true;
-
-  try{
-    // Test de connexion : appel de vérification au script
-    const testUrl = `${scriptUrl}?type=ping&email=${encodeURIComponent(email)}`;
-    const rep = await fetch(testUrl, {method:'GET'});
-
-    if(!rep.ok) throw new Error(`Erreur réseau (${rep.status})`);
-    const json = await rep.json();
-
-    if(!json.success && json.error !== 'ping'){
-      throw new Error(json.error || 'Connexion refusée par le script');
-    }
-
-    // ── Connexion réussie ──────────────────────────────
-    utilisateur = {
-      email,
-      nom:       email.split('@')[0],
-      photo:     '',
-      scriptUrl,
-      token:     '',
-      mode:      'script'
-    };
-
-    // Mémoriser l'URL script (pas le mot de passe)
-    localStorage.setItem('scriptUrl_' + location.hostname, scriptUrl);
-    sessionStorage.setItem('utilisateur', JSON.stringify(utilisateur));
-
-    demarrerApp();
-
-  } catch(err){
-    afficherErreurLogin(
-      'Impossible de se connecter : ' + err.message + '\n' +
-      'Vérifiez votre URL Apps Script et votre connexion internet.'
+  // ── Cas 2 : Email GPS Glass ───────────────────────
+  if(email.endsWith('@gps-glass.com')){
+    afficherMsg(
+      '🚧 La connexion avec les emails @gps-glass.com est en cours de développement.\n' +
+      'Cette fonctionnalité sera disponible très prochainement.\n\n' +
+      '👉 Pour tester l\'application, utilisez l\'email de démonstration ci-dessous.',
+      'info'
     );
-  } finally {
-    btn.classList.remove('charge');
-    btn.disabled = false;
+    return;
   }
+
+  // ── Cas 3 : Autre email ───────────────────────────
+  afficherMsg(
+    '❌ Cet email n\'est pas reconnu.\n' +
+    'Utilisez votre email @gps-glass.com ou l\'email de démonstration.',
+    'erreur'
+  );
+  document.getElementById('input-email').classList.add('erreur');
 }
 
-// ════════════════════════════════════════════════════════
-//  DÉMARRAGE DE L'APPLICATION
-// ════════════════════════════════════════════════════════
+function afficherMsg(msg, type){
+  const el = document.getElementById('login-msg');
+  el.textContent = msg;
+  el.className   = 'login-msg ' + type;
+}
+function effacerMsg(){
+  document.getElementById('login-msg').className = 'login-msg';
+  document.getElementById('input-email').classList.remove('erreur');
+}
 
+// ════════════════════════════════════════════════════
+// DÉMARRAGE APP
+// ════════════════════════════════════════════════════
 function demarrerApp(){
-  // Masquer écran connexion, afficher app
   document.getElementById('ecran-connexion').style.display = 'none';
   document.getElementById('app').style.display = 'block';
 
-  // Afficher les infos utilisateur dans l'en-tête
-  document.getElementById('user-nom').textContent = utilisateur.nom;
-  const avatar = document.getElementById('user-avatar');
-  if(utilisateur.photo){
-    avatar.innerHTML = `<img src="${utilisateur.photo}" alt="avatar">`;
+  // Nom affiché = partie avant @
+  const nom = emailConnecte.split('@')[0];
+  document.getElementById('user-nom').textContent    = nom;
+  document.getElementById('user-avatar').textContent = nom.charAt(0).toUpperCase();
+  document.getElementById('h-email').textContent     = emailConnecte;
+  document.getElementById('footer-txt').textContent  =
+    `Connecté : ${emailConnecte} · GPS Glass © ${new Date().getFullYear()}`;
+
+  // Badge mode
+  const badge = document.getElementById('badge-mode');
+  if(modeTest){
+    badge.textContent  = '🧪 TEST';
+    badge.className    = 'badge-mode test';
+    // Bannière avertissement
+    const b = document.getElementById('banniere-dev');
+    document.getElementById('banniere-email').textContent = emailConnecte;
+    b.classList.add('vis');
   } else {
-    avatar.textContent = utilisateur.nom.charAt(0).toUpperCase();
+    badge.textContent = '✅ GPS Glass';
+    badge.className   = 'badge-mode prod';
   }
 
-  // Sous-titre avec email
-  document.getElementById('h-depot').textContent =
-    utilisateur.email + ' · Verre Plat';
-
-  // Pied de page
-  document.getElementById('footer-app').textContent =
-    `Connecté : ${utilisateur.email} · Déclarations Dépôts © ${new Date().getFullYear()}`;
-
-  // Démarrer sur l'onglet Casse
   changerType('casse');
 }
 
-// ════════════════════════════════════════════════════════
-//  DÉCONNEXION
-// ════════════════════════════════════════════════════════
-
+// ════════════════════════════════════════════════════
+// DÉCONNEXION
+// ════════════════════════════════════════════════════
 function deconnecter(){
-  if(!confirm('Se déconnecter ?')) return;
-  sessionStorage.clear();
-  utilisateur = {email:'',nom:'',photo:'',scriptUrl:'',token:'',mode:''};
-  dfAffiche   = [];
-  typeActif   = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('ecran-connexion').style.display = 'flex';
-  effacerErreur();
+  sessionStorage.removeItem('email_connecte');
+  emailConnecte=''; modeTest=false; dfAffiche=[]; typeActif=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('ecran-connexion').style.display='flex';
+  document.getElementById('input-email').value='';
+  effacerMsg();
 }
 
-// ════════════════════════════════════════════════════════
-//  GESTION DES ERREURS DE CONNEXION
-// ════════════════════════════════════════════════════════
-
-function afficherErreurLogin(msg){
-  const el = document.getElementById('login-erreur');
-  el.textContent = msg;
-  el.classList.add('vis');
-}
-function effacerErreur(){
-  document.getElementById('login-erreur').classList.remove('vis');
-  document.querySelectorAll('.login-input').forEach(i=>i.classList.remove('erreur'));
-}
-
-// ════════════════════════════════════════════════════════
-//  NAVIGATION ONGLETS
-// ════════════════════════════════════════════════════════
-
+// ════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════
 function changerType(t){
   typeActif=t; sortKey=null; sortAsc=true;
   document.querySelectorAll('.tab').forEach(b=>{
     b.className='tab';
     if(b.dataset.t===t) b.classList.add(t==='vente'?'av':t==='casse'?'ac':'at');
   });
-  // Vider le tableau en attente de génération
   document.getElementById('tbl').style.display='none';
   document.getElementById('vide').style.display='block';
-  document.getElementById('vide').innerHTML=
-    '<div class="vide-i">📋</div><p>Appuyez sur <strong>Générer</strong><br>pour afficher les déclarations</p>';
+  document.getElementById('vide').innerHTML='<div class="vide-i">📋</div><p>Appuyez sur <strong>Générer</strong><br>pour afficher les déclarations</p>';
   document.getElementById('stats').style.display='none';
   document.getElementById('cpt').textContent='';
   dfAffiche=[];
 }
 
 function toggleDates(){
-  document.getElementById('dates-range').classList.toggle(
-    'vis', document.getElementById('sel-periode').value==='intervalle'
-  );
+  document.getElementById('dates-range').classList.toggle('vis',document.getElementById('sel-periode').value==='intervalle');
 }
 
-// ════════════════════════════════════════════════════════
-//  GÉNÉRATION — APPEL AU BACKEND SELON LE MODE
-// ════════════════════════════════════════════════════════
-
-async function generer(){
+// ════════════════════════════════════════════════════
+// GÉNÉRATION
+// ════════════════════════════════════════════════════
+function generer(){
   if(!typeActif) return;
   fermerMenuExport();
 
-  // Afficher le spinner
-  document.getElementById('vide').style.display='block';
-  document.getElementById('vide').innerHTML=
-    '<div class="chargement"><div class="chargement-spinner"></div>' +
-    '<p>Chargement des données<br>depuis Gmail…</p></div>';
-  document.getElementById('tbl').style.display='none';
-  document.getElementById('stats').style.display='none';
-  document.getElementById('cpt').textContent='';
-
-  try{
-    let rows = [];
-
-    if(utilisateur.mode === 'google'){
-      // ── Mode Google OAuth2 : appel direct API Gmail ──
-      rows = await chargerViaGmailAPI();
-    } else {
-      // ── Mode Apps Script : appel au script de l'utilisateur ──
-      rows = await chargerViaAppsScript();
-    }
-
-    // Filtrer par période
-    rows = filtrer(rows);
+  if(modeTest){
+    // Mode test : données réelles de tafatkhaled901@gmail.com
+    let rows = filtrer([...DONNEES_TEST[typeActif]]);
     dfAffiche = rows;
     afficherTableau(rows);
     afficherStats(rows);
-
-  } catch(err){
+  } else {
+    // Mode GPS Glass : fonctionnalité en développement
+    document.getElementById('tbl').style.display='none';
+    document.getElementById('vide').style.display='block';
     document.getElementById('vide').innerHTML=
-      `<div class="vide-i">⚠️</div><p>${err.message}</p>`;
-    toast('⚠️ Erreur : ' + err.message, true);
+      '<div class="vide-i">🚧</div>' +
+      '<p><strong>Connexion @gps-glass.com</strong><br>' +
+      'Cette fonctionnalité est en cours<br>de développement.<br><br>' +
+      'Utilisez l\'email de test pour<br>explorer l\'application.</p>';
+    document.getElementById('stats').style.display='none';
+    document.getElementById('cpt').textContent='';
   }
 }
 
-// ── MODE 1 : Gmail API (OAuth2 Google) ────────────────
-
-/**
- * Interroge directement l'API Gmail de Google avec le token OAuth2.
- * Cherche les emails selon le type de déclaration sélectionné.
- */
-async function chargerViaGmailAPI(){
-  const requetes = {
-    casse:     'subject:ROTURA',
-    vente:     'subject:"BON DE SORTIE"',
-    transfert: 'subject:"SALIDA DE STOCK"'
-  };
-  const query = encodeURIComponent(requetes[typeActif]);
-
-  // 1. Chercher les threads Gmail
-  const rep = await fetch(
-    `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${query}&maxResults=50`,
-    { headers: { Authorization: 'Bearer ' + utilisateur.token } }
-  );
-  if(!rep.ok) throw new Error('Erreur Gmail API (' + rep.status + ')');
-  const data = await rep.json();
-  if(!data.messages || data.messages.length===0) return [];
-
-  // 2. Lire chaque message en parallèle (max 20 à la fois)
-  const ids = data.messages.slice(0,20).map(m=>m.id);
-  const messages = await Promise.all(ids.map(id =>
-    fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=full`,
-      { headers: { Authorization: 'Bearer ' + utilisateur.token } }
-    ).then(r=>r.json())
-  ));
-
-  // 3. Parser chaque message
-  const resultats = [];
-  messages.forEach(msg => {
-    const corps = extraireCorpsEmail(msg);
-    const date  = new Date(parseInt(msg.internalDate)).toLocaleDateString('fr-FR');
-    const parsed = parserEmail(typeActif, corps, date, msg.internalDate);
-    if(parsed){
-      if(Array.isArray(parsed)) resultats.push(...parsed);
-      else resultats.push(parsed);
-    }
-  });
-  return resultats.sort((a,b)=>new Date(b.dateISO)-new Date(a.dateISO));
-}
-
-/** Extrait le corps texte d'un message Gmail API */
-function extraireCorpsEmail(msg){
-  function decodeBase64(str){
-    return decodeURIComponent(escape(atob(str.replace(/-/g,'+').replace(/_/g,'/'))));
-  }
-  try{
-    const payload = msg.payload;
-    if(payload.body && payload.body.data) return decodeBase64(payload.body.data);
-    if(payload.parts){
-      for(const part of payload.parts){
-        if(part.mimeType==='text/plain' && part.body && part.body.data){
-          return decodeBase64(part.body.data);
-        }
-      }
-    }
-  } catch(e){}
-  return '';
-}
-
-// ── MODE 2 : Apps Script ──────────────────────────────
-
-/**
- * Appelle le Google Apps Script de l'utilisateur.
- * Le script tourne sur son compte Google et lit son Gmail.
- */
-async function chargerViaAppsScript(){
-  const url = utilisateur.scriptUrl;
-  if(!url) throw new Error('URL Apps Script non configurée');
-
-  const jours = calculerJours();
-  const rep = await fetch(
-    `${url}?type=${typeActif}&depuis=${jours}&email=${encodeURIComponent(utilisateur.email)}`
-  );
-  if(!rep.ok) throw new Error('Erreur Apps Script (' + rep.status + ')');
-  const json = await rep.json();
-  if(!json.success) throw new Error(json.error || 'Erreur du script');
-
-  return json.data.flat().filter(Boolean);
-}
-
-// ════════════════════════════════════════════════════════
-//  PARSER EMAIL (commun aux deux modes)
-// ════════════════════════════════════════════════════════
-
-function parserEmail(type, corps, date, timestamp){
-  function ex(pattern){ const m=corps.match(pattern); return m?m[1].trim():'—'; }
-  const dateISO = timestamp
-    ? new Date(parseInt(timestamp)).toISOString().slice(0,10)
-    : date.split('/').reverse().join('-');
-
-  if(type==='casse'){
-    const ref   = ex(/Producto\s*:\s*(.+)/i);
-    const lot   = ex(/N[°º]?\s*Lote\s*:\s*(.+)/i);
-    const depot = ex(/ALMACEN\s+(.+?)(?:\n|$)/i);
-    const j     = parseInt(ex(/Hojas\s+rotas?\s*:\s*(\d+)/i))||0;
-    const r     = parseInt(ex(/Hojas\s+rest[^:]*:\s*(\d+)/i))||0;
-    if(ref==='—') return null;
-    return {date,dateISO,depot:depot||'GPS Benicarlò',ref,lot,jetees:j,restantes:r,total:j+r};
-  }
-  if(type==='vente'){
-    const pedido = ex(/N[°º]?\s*PEDIDO\s*:\s*(.+)/i);
-    const client = ex(/CLIENTE\s*:\s*(.+)/i);
-    const depot  = ex(/ALMACEN\s+(.+?)(?:\n|$)/i)||'GPS Benicarlò';
-    const lignes = [];
-    const re = /\d+\.\s+(.+)\r?\n\s+N[°º]?\s*Lote\s*:\s*(.+)\r?\n\s+Cajas?\s*:\s*(\d+)[^\d]*Hojas?\s*:\s*(\d+)/gi;
-    let m;
-    while((m=re.exec(corps))!==null){
-      lignes.push({date,dateISO,depot,pedido,client,
-        ref:m[1].trim(),lot:m[2].trim(),caisses:parseInt(m[3]),feuilles:parseInt(m[4])});
-    }
-    return lignes.length>0 ? lignes : null;
-  }
-  if(type==='transfert'){
-    const depot = ex(/ALMACEN\s+(.+?)(?:\n|$)/i)||'GPS Benicarlò';
-    const dest  = ex(/Destino\s*:\s*(.+)/i);
-    const f     = parseInt(ex(/Hojas\s*:\s*(\d+)/i))||0;
-    if(dest==='—') return null;
-    return {date,dateISO,depot,destination:dest,feuilles:f};
-  }
-  return null;
-}
-
-// ════════════════════════════════════════════════════════
-//  FILTRAGE
-// ════════════════════════════════════════════════════════
-
-function calculerJours(){
-  const p = document.getElementById('sel-periode').value;
-  if(p==='semaine') return 7;
-  if(p==='mois')    return 30;
-  if(p==='intervalle'){
-    const d1 = new Date(document.getElementById('d-debut').value);
-    const d2 = new Date(document.getElementById('d-fin').value);
-    return Math.ceil((d2-d1)/(1000*60*60*24))+1;
-  }
-  return 365;
-}
-
+// ════════════════════════════════════════════════════
+// FILTRAGE
+// ════════════════════════════════════════════════════
 function filtrer(rows){
   const p=document.getElementById('sel-periode').value;
   if(p==='tout') return rows;
@@ -989,10 +599,9 @@ function filtrer(rows){
   return rows.filter(r=>{const d=new Date(r.dateISO);return d>=debut&&d<=fin;});
 }
 
-// ════════════════════════════════════════════════════════
-//  AFFICHAGE TABLEAU
-// ════════════════════════════════════════════════════════
-
+// ════════════════════════════════════════════════════
+// TABLEAU
+// ════════════════════════════════════════════════════
 function afficherTableau(rows){
   const cfg=CFG[typeActif];
   const tbl=document.getElementById('tbl');
@@ -1007,20 +616,15 @@ function afficherTableau(rows){
   document.getElementById('thead').innerHTML='<tr>'+
     cfg.cols.map((c,i)=>{
       const k=cfg.keys[i];
-      return `<th class="${k===sortKey?'tri-actif':''}" onclick="trier('${k}')">
-        ${c}<span class="si">${k===sortKey?(sortAsc?'▲':'▼'):'↕'}</span></th>`;
+      return `<th class="${k===sortKey?'tri-actif':''}" onclick="trier('${k}')">${c}<span class="si">${k===sortKey?(sortAsc?'▲':'▼'):'↕'}</span></th>`;
     }).join('')+'</tr>';
   document.getElementById('tbody').innerHTML=rows.map(r=>{
     let cls='';
     if(typeActif==='casse'&&r.jetees>=10) cls='alerte';
     if(typeActif==='transfert'&&r.feuilles>=50) cls='info';
     const tds=cfg.keys.map(k=>{
-      const v=r[k]!==undefined?r[k]:'—';
-      let aff=v;
-      if(typeActif==='casse'&&k==='jetees'){
-        const cl=v>=10?'br':v>=5?'ba':'bv2';
-        aff=`<span class="bdg ${cl}">${v}</span>`;
-      }
+      const v=r[k]!==undefined?r[k]:'—'; let aff=v;
+      if(typeActif==='casse'&&k==='jetees') aff=`<span class="bdg ${v>=10?'br':v>=5?'ba':'bv2'}">${v}</span>`;
       return `<td${cfg.nums.includes(k)?' class="r"':''}>${aff}</td>`;
     }).join('');
     return `<tr class="${cls}">${tds}</tr>`;
@@ -1028,65 +632,40 @@ function afficherTableau(rows){
   cpt.textContent=rows.length===1?'1 déclaration affichée':`${rows.length} déclarations affichées`;
 }
 
-// ════════════════════════════════════════════════════════
-//  STATS
-// ════════════════════════════════════════════════════════
-
+// ════════════════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════════════════
 function afficherStats(rows){
   const el=document.getElementById('stats');
   if(rows.length===0){el.style.display='none';return;}
   let items=[];
   if(typeActif==='casse'){
-    const tj=rows.reduce((s,r)=>s+r.jetees,0);
-    const tr=rows.reduce((s,r)=>s+r.restantes,0);
-    const tt=rows.reduce((s,r)=>s+r.total,0);
+    const tj=rows.reduce((s,r)=>s+r.jetees,0),tr=rows.reduce((s,r)=>s+r.restantes,0),tt=rows.reduce((s,r)=>s+r.total,0);
     items=[{v:rows.length,l:'Caisses'},{v:tj,l:'Jetées'},{v:tr,l:'Restantes'},{v:tt>0?(tj/tt*100).toFixed(1)+'%':0,l:'Taux'}];
   } else if(typeActif==='vente'){
-    const tf=rows.reduce((s,r)=>s+r.feuilles,0);
-    items=[{v:rows.length,l:'Lignes'},{v:tf,l:'Feuilles'},{v:[...new Set(rows.map(r=>r.client))].length,l:'Clients'}];
+    items=[{v:rows.length,l:'Lignes'},{v:rows.reduce((s,r)=>s+r.feuilles,0),l:'Feuilles'},{v:[...new Set(rows.map(r=>r.client))].length,l:'Clients'}];
   } else {
-    const tf=rows.reduce((s,r)=>s+r.feuilles,0);
-    items=[{v:rows.length,l:'Transferts'},{v:tf,l:'Feuilles'},{v:[...new Set(rows.map(r=>r.destination))].length,l:'Dests'}];
+    items=[{v:rows.length,l:'Transferts'},{v:rows.reduce((s,r)=>s+r.feuilles,0),l:'Feuilles'},{v:[...new Set(rows.map(r=>r.destination))].length,l:'Dests'}];
   }
   el.style.display='flex';
   el.innerHTML=items.map(i=>`<div class="sc"><div class="sv">${i.v}</div><div class="sl">${i.l}</div></div>`).join('');
 }
 
-// ════════════════════════════════════════════════════════
-//  TRI
-// ════════════════════════════════════════════════════════
-
+// ════════════════════════════════════════════════════
+// TRI
+// ════════════════════════════════════════════════════
 function trier(key){
   if(sortKey===key) sortAsc=!sortAsc; else{sortKey=key;sortAsc=true;}
   const nums=CFG[typeActif].nums;
-  dfAffiche.sort((a,b)=>{
-    let va=a[key],vb=b[key];
-    if(nums.includes(key)){va=+va;vb=+vb;}
-    else{va=String(va).toLowerCase();vb=String(vb).toLowerCase();}
-    return va<vb?(sortAsc?-1:1):va>vb?(sortAsc?1:-1):0;
-  });
+  dfAffiche.sort((a,b)=>{let va=a[key],vb=b[key];if(nums.includes(key)){va=+va;vb=+vb;}else{va=String(va).toLowerCase();vb=String(vb).toLowerCase();}return va<vb?(sortAsc?-1:1):va>vb?(sortAsc?1:-1):0;});
   afficherTableau(dfAffiche);
 }
 
-// ════════════════════════════════════════════════════════
-//  EXPORT TOGGLE
-// ════════════════════════════════════════════════════════
-
-function toggleMenuExport(){
-  if(dfAffiche.length===0){toast('⚠️ Générez d\'abord un tableau',true);return;}
-  menuOuvert=!menuOuvert;
-  document.getElementById('btn-export').classList.toggle('actif',menuOuvert);
-  document.getElementById('export-menu').classList.toggle('vis',menuOuvert);
-}
-function fermerMenuExport(){
-  menuOuvert=false;
-  document.getElementById('btn-export').classList.remove('actif');
-  document.getElementById('export-menu').classList.remove('vis');
-}
-
-// ════════════════════════════════════════════════════════
-//  EXPORT EXCEL
-// ════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// EXPORT
+// ════════════════════════════════════════════════════
+function toggleMenuExport(){if(dfAffiche.length===0){toast('⚠️ Générez d\'abord un tableau',true);return;}menuOuvert=!menuOuvert;document.getElementById('btn-export').classList.toggle('actif',menuOuvert);document.getElementById('export-menu').classList.toggle('vis',menuOuvert);}
+function fermerMenuExport(){menuOuvert=false;document.getElementById('btn-export').classList.remove('actif');document.getElementById('export-menu').classList.remove('vis');}
 
 function exporterExcel(){
   fermerMenuExport();
@@ -1096,89 +675,41 @@ function exporterExcel(){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,LABELS[typeActif].nom.slice(0,31));
   XLSX.writeFile(wb,`declarations_${typeActif}_${new Date().toISOString().slice(0,10)}.xlsx`);
-  toast('✅ Fichier Excel téléchargé !');
+  toast('✅ Excel téléchargé !');
 }
-
-// ════════════════════════════════════════════════════════
-//  EXPORT PDF
-// ════════════════════════════════════════════════════════
 
 function exporterPDF(){
   fermerMenuExport();
-  const {jsPDF}=window.jspdf;
-  const cfg=CFG[typeActif]; const lbl=LABELS[typeActif];
+  const {jsPDF}=window.jspdf, cfg=CFG[typeActif], lbl=LABELS[typeActif];
   const per=document.getElementById('sel-periode');
   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
   doc.setFillColor(13,33,55); doc.rect(0,0,297,22,'F');
-  doc.setTextColor(91,196,217); doc.setFontSize(14); doc.setFont('helvetica','bold');
-  doc.text(`${lbl.emoji} ${lbl.nom} — ${utilisateur.email}`,14,14);
+  doc.setTextColor(91,196,217); doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text(`${lbl.emoji} ${lbl.nom} — ${emailConnecte}`,14,14);
   doc.setTextColor(180,180,180); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text(`Période : ${per.options[per.selectedIndex].text} · ${dfAffiche.length} déclaration(s) · ${new Date().toLocaleDateString('fr-FR')}`,14,20);
-  doc.autoTable({
-    startY:26, head:[cfg.cols],
-    body:dfAffiche.map(r=>cfg.keys.map(k=>r[k]!==undefined?r[k]:'')),
+  doc.text(`${per.options[per.selectedIndex].text} · ${dfAffiche.length} déclaration(s) · ${new Date().toLocaleDateString('fr-FR')}`,14,20);
+  doc.autoTable({startY:26,head:[cfg.cols],body:dfAffiche.map(r=>cfg.keys.map(k=>r[k]!==undefined?r[k]:'')),
     styles:{fontSize:8,cellPadding:3,textColor:[236,240,241],fillColor:[15,25,35]},
     headStyles:{fillColor:[30,111,168],textColor:255,fontStyle:'bold'},
-    alternateRowStyles:{fillColor:[26,37,53]},
-    didParseCell:(d)=>{
-      if(typeActif==='casse'&&d.section==='body'&&d.row.index>=0){
-        const r=dfAffiche[d.row.index];
-        if(r&&r.jetees>=10){d.cell.styles.fillColor=[45,16,16];d.cell.styles.textColor=[255,107,107];}
-      }
-    },margin:{left:14,right:14},
-  });
+    alternateRowStyles:{fillColor:[26,37,53]},margin:{left:14,right:14}});
   const pages=doc.internal.getNumberOfPages();
-  for(let i=1;i<=pages;i++){
-    doc.setPage(i); doc.setTextColor(120,120,120); doc.setFontSize(7);
-    doc.text(`Page ${i}/${pages} — ${utilisateur.email}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-5,{align:'center'});
-  }
+  for(let i=1;i<=pages;i++){doc.setPage(i);doc.setTextColor(120,120,120);doc.setFontSize(7);doc.text(`Page ${i}/${pages} — GPS Glass · ${emailConnecte}`,doc.internal.pageSize.width/2,doc.internal.pageSize.height-5,{align:'center'});}
   doc.save(`declarations_${typeActif}_${new Date().toISOString().slice(0,10)}.pdf`);
   toast('✅ PDF téléchargé !');
 }
 
-// ════════════════════════════════════════════════════════
-//  IMPRESSION
-// ════════════════════════════════════════════════════════
-
 function imprimerPDF(){
   fermerMenuExport();
-  const lbl=LABELS[typeActif];
-  const per=document.getElementById('sel-periode');
-  document.getElementById('pdf-titre').textContent=`${lbl.emoji} ${lbl.nom} — ${utilisateur.email}`;
-  document.getElementById('pdf-sous-titre').textContent=
-    `Période : ${per.options[per.selectedIndex].text} · ${dfAffiche.length} déclaration(s) · ${new Date().toLocaleDateString('fr-FR')}`;
+  const lbl=LABELS[typeActif], per=document.getElementById('sel-periode');
+  document.getElementById('pdf-titre').textContent=`${lbl.emoji} ${lbl.nom} — ${emailConnecte}`;
+  document.getElementById('pdf-sous-titre').textContent=`${per.options[per.selectedIndex].text} · ${dfAffiche.length} déclaration(s) · ${new Date().toLocaleDateString('fr-FR')}`;
   setTimeout(()=>window.print(),250);
 }
 
-// ════════════════════════════════════════════════════════
-//  GUIDE APPS SCRIPT
-// ════════════════════════════════════════════════════════
-
-function afficherGuide(){
-  alert(
-    '📋 GUIDE — Obtenir votre URL Apps Script\n\n' +
-    '1. Allez sur : script.google.com\n' +
-    '2. Cliquez "Nouveau projet"\n' +
-    '3. Collez le code Apps Script fourni par votre administrateur\n' +
-    '4. Cliquez "Déployer" → "Nouveau déploiement"\n' +
-    '5. Type : Application Web\n' +
-    '6. Accès : Moi uniquement\n' +
-    '7. Cliquez "Déployer" et copiez l\'URL\n' +
-    '8. Collez cette URL dans le champ ci-dessus\n\n' +
-    '🔒 Ce script accède uniquement à VOTRE Gmail.'
-  );
-}
-
-// ════════════════════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════════════════════
-
-function toast(msg, erreur=false){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast show'+(erreur?' erreur':'');
-  setTimeout(()=>t.classList.remove('show'),3200);
-}
+// ════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════
+function toast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(err?' err':'');setTimeout(()=>t.classList.remove('show'),3200);}
 </script>
 </body>
 </html>
