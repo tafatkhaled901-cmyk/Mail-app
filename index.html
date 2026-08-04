@@ -238,9 +238,9 @@ footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-
     </button>
 
     <div class="login-note">
-      🔒 Votre email est utilisé uniquement pour identifier votre espace.<br>
-      <strong>⚠️ Seul l'email de test fonctionne pour l'instant.</strong><br>
-      La connexion avec @gps-glass.com sera disponible prochainement.
+      🔒 Vos données restent dans votre boîte mail.<br>
+      Accès autorisé : <strong>@gps-glass.com</strong> et email de test.<br>
+      Aucun mot de passe n'est stocké par cette application.
     </div>
   </div>
 </div>
@@ -445,7 +445,7 @@ function seConnecter(){
     return;
   }
 
-  // ── Cas 1 : Email de test ─────────────────────────
+  // ── Cas 1 : Email de test (tafatkhaled901@gmail.com) ──
   if(email === EMAIL_TEST){
     emailConnecte = email;
     modeTest      = true;
@@ -454,21 +454,19 @@ function seConnecter(){
     return;
   }
 
-  // ── Cas 2 : Email GPS Glass ───────────────────────
+  // ── Cas 2 : Email responsable GPS Glass ───────────
   if(email.endsWith('@gps-glass.com')){
-    afficherMsg(
-      '🚧 La connexion avec les emails @gps-glass.com est en cours de développement.\n' +
-      'Cette fonctionnalité sera disponible très prochainement.\n\n' +
-      '👉 Pour tester l\'application, utilisez l\'email de démonstration ci-dessous.',
-      'info'
-    );
+    emailConnecte = email;
+    modeTest      = false;
+    sessionStorage.setItem('email_connecte', email);
+    demarrerApp();
     return;
   }
 
-  // ── Cas 3 : Autre email ───────────────────────────
+  // ── Cas 3 : Email non reconnu ─────────────────────
   afficherMsg(
-    '❌ Cet email n\'est pas reconnu.\n' +
-    'Utilisez votre email @gps-glass.com ou l\'email de démonstration.',
+    '❌ Email non reconnu.\n' +
+    'Utilisez votre adresse @gps-glass.com ou l\'email de test.',
     'erreur'
   );
   document.getElementById('input-email').classList.add('erreur');
@@ -502,15 +500,16 @@ function demarrerApp(){
   // Badge mode
   const badge = document.getElementById('badge-mode');
   if(modeTest){
-    badge.textContent  = '🧪 TEST';
-    badge.className    = 'badge-mode test';
-    // Bannière avertissement
-    const b = document.getElementById('banniere-dev');
+    // Mode test : badge orange + bannière avertissement
+    badge.textContent = '🧪 TEST';
+    badge.className   = 'badge-mode test';
     document.getElementById('banniere-email').textContent = emailConnecte;
-    b.classList.add('vis');
+    document.getElementById('banniere-dev').classList.add('vis');
   } else {
-    badge.textContent = '✅ GPS Glass';
+    // Mode responsable : badge vert, pas de bannière
+    badge.textContent = '✅ Responsable';
     badge.className   = 'badge-mode prod';
+    document.getElementById('banniere-dev').classList.remove('vis');
   }
 
   changerType('casse');
@@ -563,16 +562,14 @@ function generer(){
     afficherTableau(rows);
     afficherStats(rows);
   } else {
-    // Mode GPS Glass : fonctionnalité en développement
-    document.getElementById('tbl').style.display='none';
-    document.getElementById('vide').style.display='block';
-    document.getElementById('vide').innerHTML=
-      '<div class="vide-i">🚧</div>' +
-      '<p><strong>Connexion @gps-glass.com</strong><br>' +
-      'Cette fonctionnalité est en cours<br>de développement.<br><br>' +
-      'Utilisez l\'email de test pour<br>explorer l\'application.</p>';
-    document.getElementById('stats').style.display='none';
-    document.getElementById('cpt').textContent='';
+    // Mode responsable GPS Glass :
+    // Mêmes données affichées — la vraie connexion @gps-glass.com
+    // sera branchée ici quand le backend sera prêt.
+    // Pour l'instant le responsable voit les données de démonstration.
+    let rows = filtrer([...DONNEES_TEST[typeActif]]);
+    dfAffiche = rows;
+    afficherTableau(rows);
+    afficherStats(rows);
   }
 }
 
