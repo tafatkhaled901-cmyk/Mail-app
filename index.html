@@ -4,18 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>GPS Benicarlò — Déclarations</title>
+
+<!-- ══ BIBLIOTHÈQUES EXTERNES ══════════════════════════════════ -->
+<!-- SheetJS : génération fichier Excel (.xlsx)                  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- jsPDF + AutoTable : génération fichier PDF                  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
 <style>
+/* ── RESET ─────────────────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0F1923;--surface:#1A2535;--surface2:#0D2137;
   --bleu:#1E6FA8;--cyan:#5BC4D9;--vert:#27AE60;
-  --rouge:#E74C3C;--ambre:#F39C12;
+  --rouge:#E74C3C;--rouge-actif:#FF6B6B;--ambre:#F39C12;
   --texte:#ECF0F1;--texte2:#8FA3B1;--bord:#2C3E50;
   --lp:#1E2D3D;--li:#162030;--rayon:12px;--rayon-sm:8px;
 }
 html,body{background:var(--bg);color:var(--texte);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh;-webkit-tap-highlight-color:transparent}
 
-/* EN-TÊTE */
+/* ── EN-TÊTE ───────────────────────────────────────────────── */
 header{background:var(--surface2);border-bottom:3px solid var(--cyan);padding:14px 16px 12px;position:sticky;top:0;z-index:100}
 .h-top{display:flex;align-items:center;gap:10px}
 .logo{font-size:26px;line-height:1}
@@ -23,7 +32,7 @@ header{background:var(--surface2);border-bottom:3px solid var(--cyan);padding:14
 .h-titres p{font-size:11px;color:var(--texte2);margin-top:1px}
 .h-date{margin-left:auto;font-size:11px;color:var(--texte2);text-align:right}
 
-/* ONGLETS */
+/* ── ONGLETS ───────────────────────────────────────────────── */
 .nav-tabs{display:flex;gap:6px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none}
 .nav-tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;min-width:90px;padding:10px 6px;border:none;border-radius:var(--rayon) var(--rayon) 0 0;background:var(--surface);color:var(--texte2);font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
@@ -31,7 +40,7 @@ header{background:var(--surface2);border-bottom:3px solid var(--cyan);padding:14
 .tab.ac{background:#3d1a1a;color:var(--rouge);border-bottom-color:var(--rouge)}
 .tab.at{background:#3d2e0a;color:var(--ambre);border-bottom-color:var(--ambre)}
 
-/* FILTRES */
+/* ── FILTRES ───────────────────────────────────────────────── */
 main{padding:0 16px 32px}
 .carte{background:var(--surface);border:1px solid var(--bord);border-top:none;border-radius:0 0 var(--rayon) var(--rayon);padding:14px;margin-bottom:14px}
 .fg{margin-bottom:10px}
@@ -42,22 +51,111 @@ select:focus,input:focus{outline:2px solid var(--cyan);outline-offset:1px}
 .dates-range{display:none;gap:10px}
 .dates-range.vis{display:flex}
 .dates-range .fg{flex:1;margin-bottom:0}
-.btn-row{display:flex;gap:10px;margin-top:6px}
-.btn{flex:1;padding:12px 8px;border:none;border-radius:var(--rayon-sm);font-size:13px;font-weight:700;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:5px;color:#fff}
-.btn:active{transform:scale(.97);opacity:.85}
-.bg{background:var(--bleu)}
-.bv{background:var(--rouge)}
 
-/* STATS */
+/* ── BOUTON GÉNÉRER ────────────────────────────────────────── */
+.btn-row{display:flex;gap:10px;margin-top:6px;align-items:stretch}
+.btn{flex:1;padding:12px 8px;border:none;border-radius:var(--rayon-sm);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;color:#fff}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-generer{background:var(--bleu)}
+.btn-generer:hover{background:#2480c0}
+
+/* ── BOUTON EXPORT (rouge toggle) ──────────────────────────── */
+.export-wrap{position:relative;flex:1}
+
+/* Bouton rouge principal */
+.btn-export{
+  width:100%;height:100%;
+  background:var(--rouge);
+  border:none;border-radius:var(--rayon-sm);
+  color:#fff;font-size:13px;font-weight:700;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:12px 8px;
+  transition:all .25s;
+  position:relative;
+  overflow:hidden;
+}
+/* État ACTIF du bouton rouge (menu ouvert) */
+.btn-export.actif{
+  background:#c0392b;
+  box-shadow:0 0 0 3px rgba(231,76,60,.4);
+  border-radius:var(--rayon-sm) var(--rayon-sm) 0 0;
+}
+.btn-export:hover{background:#c0392b}
+
+/* Indicateur point "actif" */
+.btn-export .point-actif{
+  width:7px;height:7px;
+  background:#fff;
+  border-radius:50%;
+  opacity:0;
+  transition:opacity .2s;
+  position:absolute;top:7px;right:7px;
+}
+.btn-export.actif .point-actif{opacity:1;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.6}}
+
+/* Icône rotation à l'ouverture */
+.btn-export .icone-export{transition:transform .25s}
+.btn-export.actif .icone-export{transform:rotate(45deg)}
+
+/* ── MENU DÉROULANT EXPORT ─────────────────────────────────── */
+.export-menu{
+  display:none;
+  position:absolute;
+  top:100%;left:0;right:0;
+  background:var(--surface);
+  border:1px solid var(--rouge);
+  border-top:none;
+  border-radius:0 0 var(--rayon-sm) var(--rayon-sm);
+  z-index:150;
+  overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.export-menu.vis{display:block;animation:slideDown .2s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Titre du menu */
+.export-menu-titre{
+  font-size:10px;font-weight:700;
+  color:var(--texte2);
+  text-transform:uppercase;letter-spacing:.8px;
+  padding:10px 14px 6px;
+  border-bottom:1px solid var(--bord);
+}
+
+/* Boutons Excel et PDF dans le menu */
+.export-option{
+  width:100%;padding:13px 14px;
+  border:none;background:transparent;
+  color:var(--texte);font-size:13px;font-weight:600;
+  cursor:pointer;
+  display:flex;align-items:center;gap:10px;
+  transition:background .15s;
+  text-align:left;
+}
+.export-option:hover{background:var(--bord)}
+.export-option:active{background:var(--bleu)}
+.export-option .opt-ico{font-size:18px;width:26px;text-align:center}
+.export-option .opt-txt{display:flex;flex-direction:column}
+.export-option .opt-titre{font-size:13px;font-weight:700}
+.export-option .opt-desc{font-size:10px;color:var(--texte2);margin-top:1px}
+.export-option.excel .opt-titre{color:#1D6F42}  /* vert Excel */
+.export-option.pdf   .opt-titre{color:#E74C3C}  /* rouge PDF  */
+
+/* Séparateur entre les options */
+.export-sep{height:1px;background:var(--bord);margin:0}
+
+/* ── STATS ─────────────────────────────────────────────────── */
 .stats{display:none;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .sc{flex:1;min-width:70px;background:var(--surface);border:1px solid var(--bord);border-radius:var(--rayon-sm);padding:10px;text-align:center}
 .sv{font-size:18px;font-weight:800;color:var(--cyan);line-height:1}
 .sl{font-size:9px;color:var(--texte2);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
 
-/* COMPTEUR */
+/* ── COMPTEUR ──────────────────────────────────────────────── */
 .cpt{font-size:11px;color:var(--texte2);margin-bottom:8px;padding-left:2px}
 
-/* TABLEAU */
+/* ── TABLEAU ───────────────────────────────────────────────── */
 .tw{overflow-x:auto;border-radius:var(--rayon);border:1px solid var(--bord);-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
 thead th{background:var(--surface2);color:var(--cyan);font-weight:700;padding:10px 12px;text-align:left;font-size:11px;letter-spacing:.3px;cursor:pointer;user-select:none;position:sticky;top:0}
@@ -76,45 +174,38 @@ td.r{text-align:right;font-variant-numeric:tabular-nums}
 .bv2{background:#0e3322;color:var(--vert)}
 .ba{background:#3d2800;color:var(--ambre)}
 
-/* VIDE */
+/* ── VIDE ──────────────────────────────────────────────────── */
 .vide{text-align:center;padding:44px 20px;color:var(--texte2)}
 .vide-i{font-size:36px;margin-bottom:10px}
 .vide p{font-size:13px}
 
-/* MODAL PDF */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
-.overlay.vis{display:flex}
-.modal{background:var(--surface);border:1px solid var(--bord);border-radius:var(--rayon);padding:20px;width:90%;max-width:360px;text-align:center}
-.modal h3{font-size:15px;margin-bottom:8px;color:var(--cyan)}
-.modal p{font-size:12px;color:var(--texte2);margin-bottom:16px;line-height:1.6}
-.modal-btns{display:flex;gap:10px}
-.modal-btns .btn{flex:1;padding:11px}
-
-/* PIED */
+/* ── PIED ──────────────────────────────────────────────────── */
 footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-top:1px solid var(--bord);margin-top:8px}
 
-/* TOAST */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2a;color:var(--vert);border:1px solid var(--vert);border-radius:var(--rayon);padding:11px 18px;font-size:12px;font-weight:600;z-index:9999;transition:transform .3s;white-space:nowrap}
+/* ── TOAST ─────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e3a2a;color:var(--vert);border:1px solid var(--vert);border-radius:var(--rayon);padding:11px 18px;font-size:12px;font-weight:600;z-index:9999;transition:transform .3s;white-space:nowrap;max-width:90vw;text-align:center}
 .toast.show{transform:translateX(-50%) translateY(0)}
+.toast.erreur{background:#3d1a1a;color:var(--rouge);border-color:var(--rouge)}
 
-/* PDF PRINT */
+/* ── IMPRESSION PDF ────────────────────────────────────────── */
 @media print{
-  header,nav,.carte,.btn-row,.stats,.cpt,footer,.overlay,.toast{display:none!important}
+  header,.nav-tabs,.carte,.stats,.cpt,footer,.toast,#export-wrap-el{display:none!important}
   body{background:#fff;color:#000}
   .tw{border:none;overflow:visible}
-  table{font-size:11px}
-  thead th{background:#1E6FA8;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  tbody tr:nth-child(even){background:#f0f4f8;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .alerte{background:#ffe0e0!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  table{font-size:10px}
+  thead th{background:#1E6FA8!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  tbody tr:nth-child(even){background:#EBF5FB!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .alerte{background:#FDEDEC!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #pdf-header{display:block!important}
 }
-#pdf-header{display:none;margin-bottom:16px}
-#pdf-header h2{font-size:16px;font-weight:700;color:#1E6FA8}
-#pdf-header p{font-size:11px;color:#555;margin-top:2px}
+#pdf-header{display:none;margin-bottom:14px}
+#pdf-header h2{font-size:15px;font-weight:700;color:#1E6FA8}
+#pdf-header p{font-size:10px;color:#555;margin-top:2px}
 </style>
 </head>
 <body>
 
+<!-- ═══ EN-TÊTE ══════════════════════════════════════════════ -->
 <header>
   <div class="h-top">
     <div class="logo">🪟</div>
@@ -126,341 +217,308 @@ footer{text-align:center;font-size:10px;color:var(--texte2);padding:12px;border-
   </div>
 </header>
 
+<!-- ═══ ONGLETS ══════════════════════════════════════════════ -->
 <div class="nav-tabs">
   <button class="tab" data-t="vente"     onclick="changerType('vente')">🛒 Ventes</button>
   <button class="tab" data-t="casse"     onclick="changerType('casse')">⚠️ Casse</button>
   <button class="tab" data-t="transfert" onclick="changerType('transfert')">🚚 Transferts</button>
 </div>
 
+<!-- ═══ CONTENU PRINCIPAL ════════════════════════════════════ -->
 <main>
-<div class="carte">
-  <div class="fg">
-    <label class="fl">📅 Période</label>
-    <select id="sel-periode" onchange="toggleDates()">
-      <option value="tout">Toutes les déclarations</option>
-      <option value="semaine">Semaine en cours</option>
-      <option value="mois">Mois en cours</option>
-      <option value="intervalle">Intervalle de dates</option>
-    </select>
-  </div>
-  <div class="dates-range" id="dates-range">
-    <div class="fg"><label class="fl">Du</label><input type="date" id="d-debut"></div>
-    <div class="fg"><label class="fl">Au</label><input type="date" id="d-fin"></div>
-  </div>
-  <div class="btn-row">
-    <button class="btn bg" onclick="generer()">🔍 Générer</button>
-    <button class="btn bv" onclick="ouvrirModalPDF()">🖨️ Exporter PDF</button>
-  </div>
-</div>
 
-<!-- STATS -->
-<div class="stats" id="stats"></div>
+  <!-- CARTE FILTRES -->
+  <div class="carte">
+    <div class="fg">
+      <label class="fl">📅 Période</label>
+      <select id="sel-periode" onchange="toggleDates()">
+        <option value="tout">Toutes les déclarations</option>
+        <option value="semaine">Semaine en cours</option>
+        <option value="mois">Mois en cours</option>
+        <option value="intervalle">Intervalle de dates</option>
+      </select>
+    </div>
+    <div class="dates-range" id="dates-range">
+      <div class="fg"><label class="fl">Du</label><input type="date" id="d-debut"></div>
+      <div class="fg"><label class="fl">Au</label><input type="date" id="d-fin"></div>
+    </div>
 
-<!-- COMPTEUR -->
-<div class="cpt" id="cpt"></div>
+    <!-- BOUTONS : Générer + Export toggle -->
+    <div class="btn-row">
 
-<!-- EN-TÊTE PDF (visible seulement à l'impression) -->
-<div id="pdf-header">
-  <h2 id="pdf-titre"></h2>
-  <p id="pdf-sous-titre"></p>
-</div>
+      <!-- Bouton Générer (bleu) -->
+      <button class="btn btn-generer" onclick="generer()">🔍 Générer</button>
 
-<!-- TABLEAU -->
-<div class="tw">
-  <div class="vide" id="vide">
-    <div class="vide-i">📋</div>
-    <p>Appuyez sur <strong>Générer</strong><br>pour afficher les déclarations</p>
+      <!-- Bouton Export (rouge — toggle) + menu déroulant -->
+      <div class="export-wrap" id="export-wrap-el">
+
+        <!-- Bouton rouge principal -->
+        <button class="btn-export" id="btn-export" onclick="toggleMenuExport()">
+          <span class="point-actif"></span>
+          <span class="icone-export">📤</span>
+          <span>Exporter</span>
+        </button>
+
+        <!-- Menu déroulant avec choix Excel / PDF -->
+        <div class="export-menu" id="export-menu">
+          <div class="export-menu-titre">Choisir le format</div>
+
+          <!-- Option Excel -->
+          <button class="export-option excel" onclick="exporterExcel()">
+            <span class="opt-ico">📊</span>
+            <span class="opt-txt">
+              <span class="opt-titre">Excel (.xlsx)</span>
+              <span class="opt-desc">Télécharger le tableau en fichier Excel</span>
+            </span>
+          </button>
+
+          <div class="export-sep"></div>
+
+          <!-- Option PDF téléchargement -->
+          <button class="export-option pdf" onclick="exporterPDF()">
+            <span class="opt-ico">📄</span>
+            <span class="opt-txt">
+              <span class="opt-titre">PDF — Télécharger</span>
+              <span class="opt-desc">Générer et télécharger un fichier PDF</span>
+            </span>
+          </button>
+
+          <div class="export-sep"></div>
+
+          <!-- Option PDF impression -->
+          <button class="export-option pdf" onclick="imprimerPDF()">
+            <span class="opt-ico">🖨️</span>
+            <span class="opt-txt">
+              <span class="opt-titre">PDF — Imprimer</span>
+              <span class="opt-desc">Ouvrir la boîte d'impression du navigateur</span>
+            </span>
+          </button>
+        </div>
+      </div><!-- fin export-wrap -->
+    </div><!-- fin btn-row -->
+  </div><!-- fin carte -->
+
+  <!-- STATISTIQUES -->
+  <div class="stats" id="stats"></div>
+
+  <!-- COMPTEUR -->
+  <div class="cpt" id="cpt"></div>
+
+  <!-- EN-TÊTE VISIBLE UNIQUEMENT À L'IMPRESSION -->
+  <div id="pdf-header">
+    <h2 id="pdf-titre"></h2>
+    <p id="pdf-sous-titre"></p>
   </div>
-  <table id="tbl" style="display:none">
-    <thead id="thead"></thead>
-    <tbody id="tbody"></tbody>
-  </table>
-</div>
+
+  <!-- TABLEAU -->
+  <div class="tw">
+    <div class="vide" id="vide">
+      <div class="vide-i">📋</div>
+      <p>Appuyez sur <strong>Générer</strong><br>pour afficher les déclarations</p>
+    </div>
+    <table id="tbl" style="display:none">
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
 </main>
 
 <footer>Données extraites de tafatkhaled901@gmail.com · GPS Benicarlò © 2026</footer>
-
-<!-- MODAL PDF -->
-<div class="overlay" id="overlay" onclick="fermerModal(event)">
-  <div class="modal">
-    <h3>🖨️ Exporter en PDF</h3>
-    <p>L'impression du tableau s'ouvrira.<br>Choisissez <strong>"Enregistrer en PDF"</strong><br>dans la boîte de dialogue d'impression.</p>
-    <div class="modal-btns">
-      <button class="btn" style="background:var(--texte2)" onclick="fermerModal()">Annuler</button>
-      <button class="btn bg" onclick="imprimerPDF()">Imprimer / PDF</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════════════════ -->
 <script>
-// ═══════════════════════════════════════════════════════
-// DONNÉES RÉELLES EXTRAITES DE tafatkhaled901@gmail.com
-// ═══════════════════════════════════════════════════════
 
+// ── DONNÉES RÉELLES EXTRAITES DE tafatkhaled901@gmail.com ────
 const DONNEES = {
-
-  // ── CASSE : 10 déclarations (DECLARACION DE ROTURA) ──
   casse: [
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", ref:"FL4-321/214",  lot:"01125082534C", jetees:5,  restantes:27, total:32},
-    {date:"12/07/2026", dateISO:"2026-07-12", depot:"GPS Benicarlò", ref:"FL8-321/214",  lot:"01125082864C", jetees:15, restantes:1,  total:16},
-    {date:"12/07/2026", dateISO:"2026-07-12", depot:"GPS Benicarlò", ref:"FL8-321/214",  lot:"01125082851C", jetees:1,  restantes:15, total:16},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", ref:"FL8-321/214",  lot:"01125082843C", jetees:1,  restantes:15, total:16},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", ref:"FL8-321/214",  lot:"01125082852C", jetees:5,  restantes:11, total:16},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", ref:"FL12-300/200", lot:"01125082782C", jetees:1,  restantes:10, total:11},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", ref:"FL8-321/214",  lot:"01125082832C", jetees:6,  restantes:10, total:16},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", ref:"FL12-300/200", lot:"01125082801C", jetees:13, restantes:0,  total:13},
-    {date:"10/07/2026", dateISO:"2026-07-10", depot:"GPS Benicarlò", ref:"FL8-321/214",  lot:"01125082839C", jetees:13, restantes:3,  total:16},
-    {date:"07/07/2026", dateISO:"2026-07-07", depot:"GPS Benicarlò", ref:"FL8-321/214",  lot:"01125082869C", jetees:4,  restantes:12, total:16},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",ref:"FL4-321/214", lot:"01125082534C",jetees:5, restantes:27,total:32},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082864C",jetees:15,restantes:1, total:16},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082851C",jetees:1, restantes:15,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082843C",jetees:1, restantes:15,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082852C",jetees:5, restantes:11,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL12-300/200",lot:"01125082782C",jetees:1, restantes:10,total:11},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082832C",jetees:6, restantes:10,total:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",ref:"FL12-300/200",lot:"01125082801C",jetees:13,restantes:0, total:13},
+    {date:"10/07/2026",dateISO:"2026-07-10",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082839C",jetees:13,restantes:3, total:16},
+    {date:"07/07/2026",dateISO:"2026-07-07",depot:"GPS Benicarlò",ref:"FL8-321/214", lot:"01125082869C",jetees:4, restantes:12,total:16},
   ],
-
-  // ── VENTES : 12 lignes (BON DE SORTIE VENTA) ─────────
   vente: [
-    // Pedido 098765 - Tafat - 29/07/2026
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"098765",        client:"Tafat",   ref:"FL8-321/214",  lot:"01125082849C", caisses:1, feuilles:16},
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"098765",        client:"Tafat",   ref:"FL4-321/214",  lot:"01125082534C", caisses:1, feuilles:32},
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"098765",        client:"Tafat",   ref:"FL4-321/214",  lot:"01125082531C", caisses:1, feuilles:32},
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"098765",        client:"Tafat",   ref:"FL8-321/214",  lot:"01125082869C", caisses:1, feuilles:16},
-    // Pedido 123456 - Tivitec - 29/07/2026
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"123456",        client:"Tivitec", ref:"FL8-321/214",  lot:"01125082820C", caisses:1, feuilles:16},
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"123456",        client:"Tivitec", ref:"FL4-321/214",  lot:"01125082513C", caisses:1, feuilles:32},
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"123456",        client:"Tivitec", ref:"FL12-300/200", lot:"01125082799C", caisses:1, feuilles:18},
-    // Pedido 3467532 - Tivitec - 29/07/2026
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", pedido:"3467532",       client:"Tivitec", ref:"FL4-321/214",  lot:"01125082533C", caisses:1, feuilles:32},
-    // Pedido 11111111111111 - Samia - 13/07/2026
-    {date:"13/07/2026", dateISO:"2026-07-13", depot:"GPS Benicarlò", pedido:"11111111111111",client:"Samia",   ref:"FL12-300/200", lot:"01125082769C", caisses:1, feuilles:18},
-    // Pedido 1234567890 - Samia - 13/07/2026
-    {date:"13/07/2026", dateISO:"2026-07-13", depot:"GPS Benicarlò", pedido:"1234567890",    client:"Samia",   ref:"FL12-300/200", lot:"01125082769C", caisses:1, feuilles:18},
-    // Pedido 543268986 - Rearg - 12/07/2026
-    {date:"12/07/2026", dateISO:"2026-07-12", depot:"GPS Benicarlò", pedido:"543268986",     client:"Rearg",   ref:"FL8-321/214",  lot:"01125082864C", caisses:1, feuilles:1},
-    // Pedido 876544 (snippet only, récupéré)
-    {date:"12/07/2026", dateISO:"2026-07-12", depot:"GPS Benicarlò", pedido:"876544",        client:"Gjhz",    ref:"FL8-321/214",  lot:"—",            caisses:1, feuilles:0},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL8-321/214", lot:"01125082849C",caisses:1,feuilles:16},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL4-321/214", lot:"01125082534C",caisses:1,feuilles:32},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL4-321/214", lot:"01125082531C",caisses:1,feuilles:32},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"098765",        client:"Tafat",  ref:"FL8-321/214", lot:"01125082869C",caisses:1,feuilles:16},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"123456",        client:"Tivitec",ref:"FL8-321/214", lot:"01125082820C",caisses:1,feuilles:16},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"123456",        client:"Tivitec",ref:"FL4-321/214", lot:"01125082513C",caisses:1,feuilles:32},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"123456",        client:"Tivitec",ref:"FL12-300/200",lot:"01125082799C",caisses:1,feuilles:18},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",pedido:"3467532",       client:"Tivitec",ref:"FL4-321/214", lot:"01125082533C",caisses:1,feuilles:32},
+    {date:"13/07/2026",dateISO:"2026-07-13",depot:"GPS Benicarlò",pedido:"11111111111111",client:"Samia",  ref:"FL12-300/200",lot:"01125082769C",caisses:1,feuilles:18},
+    {date:"13/07/2026",dateISO:"2026-07-13",depot:"GPS Benicarlò",pedido:"1234567890",    client:"Samia",  ref:"FL12-300/200",lot:"01125082769C",caisses:1,feuilles:18},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",pedido:"543268986",     client:"Rearg",  ref:"FL8-321/214", lot:"01125082864C",caisses:1,feuilles:1},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",pedido:"876544",        client:"Gjhz",   ref:"FL8-321/214", lot:"—",           caisses:1,feuilles:0},
   ],
-
-  // ── TRANSFERTS : 7 (SALIDA DE STOCK - Traspaso) ──────
   transfert: [
-    {date:"29/07/2026", dateISO:"2026-07-29", depot:"GPS Benicarlò", destination:"Alicante", lot:"—", feuilles:64},
-    {date:"12/07/2026", dateISO:"2026-07-12", depot:"GPS Benicarlò", destination:"Alicanti", lot:"—", feuilles:16},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", destination:"Madride",  lot:"—", feuilles:16},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", destination:"Ytree",    lot:"—", feuilles:16},
-    {date:"11/07/2026", dateISO:"2026-07-11", depot:"GPS Benicarlò", destination:"Valenvia", lot:"—", feuilles:27},
-    {date:"10/07/2026", dateISO:"2026-07-10", depot:"GPS Benicarlò", destination:"Valencia", lot:"—", feuilles:91},
-    {date:"09/07/2026", dateISO:"2026-07-09", depot:"GPS Benicarlò", destination:"Alicante", lot:"—", feuilles:70},
+    {date:"29/07/2026",dateISO:"2026-07-29",depot:"GPS Benicarlò",destination:"Alicante",lot:"—",feuilles:64},
+    {date:"12/07/2026",dateISO:"2026-07-12",depot:"GPS Benicarlò",destination:"Alicanti",lot:"—",feuilles:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",destination:"Madride", lot:"—",feuilles:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",destination:"Ytree",   lot:"—",feuilles:16},
+    {date:"11/07/2026",dateISO:"2026-07-11",depot:"GPS Benicarlò",destination:"Valenvia",lot:"—",feuilles:27},
+    {date:"10/07/2026",dateISO:"2026-07-10",depot:"GPS Benicarlò",destination:"Valencia",lot:"—",feuilles:91},
+    {date:"09/07/2026",dateISO:"2026-07-09",depot:"GPS Benicarlò",destination:"Alicante",lot:"—",feuilles:70},
   ]
 };
 
-// ═══════════════════════════════════════════════════════
-// CONFIG COLONNES
-// ═══════════════════════════════════════════════════════
+// ── CONFIG COLONNES ──────────────────────────────────────────
 const CFG = {
-  casse: {
-    cols: ["Date","Dépôt","Réf. Caisse","N° Lot","Feuilles Jetées","Feuilles Restantes","Total Initial"],
-    keys: ["date","depot","ref","lot","jetees","restantes","total"],
-    nums: ["jetees","restantes","total"],
-  },
-  vente: {
-    cols: ["Date","Dépôt","N° Commande","Client","Réf. Produit","N° Lot","Caisses","Feuilles"],
-    keys: ["date","depot","pedido","client","ref","lot","caisses","feuilles"],
-    nums: ["caisses","feuilles"],
-  },
-  transfert: {
-    cols: ["Date","Dépôt Origine","Destination","Nbre Feuilles"],
-    keys: ["date","depot","destination","feuilles"],
-    nums: ["feuilles"],
-  },
+  casse:    {cols:["Date","Dépôt","Réf. Caisse","N° Lot","Feuilles Jetées","Feuilles Restantes","Total Initial"],keys:["date","depot","ref","lot","jetees","restantes","total"],nums:["jetees","restantes","total"]},
+  vente:    {cols:["Date","Dépôt","N° Commande","Client","Réf. Produit","N° Lot","Caisses","Feuilles"],keys:["date","depot","pedido","client","ref","lot","caisses","feuilles"],nums:["caisses","feuilles"]},
+  transfert:{cols:["Date","Dépôt Origine","Destination","Nbre Feuilles"],keys:["date","depot","destination","feuilles"],nums:["feuilles"]},
 };
-
 const LABELS = {
-  casse:     {emoji:"⚠️", nom:"Déclarations de Casse"},
-  vente:     {emoji:"🛒", nom:"Bons de Sortie Vente"},
-  transfert: {emoji:"🚚", nom:"Sorties de Stock (Transferts)"},
+  casse:    {emoji:"⚠️",nom:"Déclarations de Casse"},
+  vente:    {emoji:"🛒",nom:"Bons de Sortie Vente"},
+  transfert:{emoji:"🚚",nom:"Sorties de Stock"},
 };
 
-// ═══════════════════════════════════════════════════════
-// ÉTAT
-// ═══════════════════════════════════════════════════════
+// ── ÉTAT ─────────────────────────────────────────────────────
 let typeActif = null;
 let dfAffiche = [];
 let sortKey   = null;
 let sortAsc   = true;
+let menuOuvert = false;
 
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
+// ── INIT ─────────────────────────────────────────────────────
 window.onload = () => {
   const auj = new Date();
   document.getElementById('h-date').textContent =
     auj.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
-  const fmtISO = d => d.toISOString().slice(0,10);
+  const iso = d => d.toISOString().slice(0,10);
   const il30 = new Date(); il30.setDate(auj.getDate()-30);
-  document.getElementById('d-fin').value   = fmtISO(auj);
-  document.getElementById('d-debut').value = fmtISO(il30);
+  document.getElementById('d-fin').value   = iso(auj);
+  document.getElementById('d-debut').value = iso(il30);
+
+  // Fermer le menu export si clic ailleurs
+  document.addEventListener('click', e => {
+    if(!document.getElementById('export-wrap-el').contains(e.target)){
+      fermerMenuExport();
+    }
+  });
   changerType('casse');
 };
 
-// ═══════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════
+// ── NAVIGATION ───────────────────────────────────────────────
 function changerType(t){
-  typeActif = t;
-  sortKey = null; sortAsc = true;
-  document.querySelectorAll('.tab').forEach(b => {
-    b.className = 'tab';
-    if(b.dataset.t === t){
-      b.classList.add(t==='vente'?'av':t==='casse'?'ac':'at');
-    }
+  typeActif=t; sortKey=null; sortAsc=true;
+  document.querySelectorAll('.tab').forEach(b=>{
+    b.className='tab';
+    if(b.dataset.t===t) b.classList.add(t==='vente'?'av':t==='casse'?'ac':'at');
   });
   generer();
 }
-
 function toggleDates(){
-  const p = document.getElementById('sel-periode').value;
-  document.getElementById('dates-range').classList.toggle('vis', p==='intervalle');
+  document.getElementById('dates-range').classList.toggle('vis',
+    document.getElementById('sel-periode').value==='intervalle');
 }
 
-// ═══════════════════════════════════════════════════════
-// FILTRAGE PAR PÉRIODE
-// ═══════════════════════════════════════════════════════
+// ── FILTRAGE ─────────────────────────────────────────────────
 function filtrer(rows){
-  const p = document.getElementById('sel-periode').value;
-  if(p === 'tout') return rows;
-
-  const auj = new Date(); auj.setHours(23,59,59,999);
-  let debut, fin;
-
-  if(p === 'semaine'){
-    fin   = new Date(auj);
-    debut = new Date(auj);
-    const j = debut.getDay();
-    debut.setDate(debut.getDate() - (j===0?6:j-1));
+  const p=document.getElementById('sel-periode').value;
+  if(p==='tout') return rows;
+  const auj=new Date(); auj.setHours(23,59,59,999);
+  let debut,fin;
+  if(p==='semaine'){
+    fin=new Date(auj); debut=new Date(auj);
+    const j=debut.getDay();
+    debut.setDate(debut.getDate()-(j===0?6:j-1));
     debut.setHours(0,0,0,0);
-  } else if(p === 'mois'){
-    debut = new Date(auj.getFullYear(), auj.getMonth(), 1);
-    fin   = auj;
+  } else if(p==='mois'){
+    debut=new Date(auj.getFullYear(),auj.getMonth(),1); fin=auj;
   } else {
-    debut = new Date(document.getElementById('d-debut').value);
-    fin   = new Date(document.getElementById('d-fin').value);
+    debut=new Date(document.getElementById('d-debut').value);
+    fin=new Date(document.getElementById('d-fin').value);
     fin.setHours(23,59,59,999);
-    if(isNaN(debut)||isNaN(fin)){toast('⚠️ Dates invalides');return[];}
+    if(isNaN(debut)||isNaN(fin)){toast('⚠️ Dates invalides',true);return[];}
   }
-  return rows.filter(r => {
-    const d = new Date(r.dateISO);
-    return d >= debut && d <= fin;
-  });
+  return rows.filter(r=>{const d=new Date(r.dateISO);return d>=debut&&d<=fin;});
 }
 
-// ═══════════════════════════════════════════════════════
-// GÉNÉRATION
-// ═══════════════════════════════════════════════════════
+// ── GÉNÉRATION ───────────────────────────────────────────────
 function generer(){
   if(!typeActif) return;
-  let rows = filtrer([...DONNEES[typeActif]]);
-  dfAffiche = rows;
-  afficherTableau(rows);
-  afficherStats(rows);
+  dfAffiche=filtrer([...DONNEES[typeActif]]);
+  afficherTableau(dfAffiche);
+  afficherStats(dfAffiche);
+  fermerMenuExport();
 }
 
-// ═══════════════════════════════════════════════════════
-// AFFICHAGE TABLEAU
-// ═══════════════════════════════════════════════════════
+// ── TABLEAU ──────────────────────────────────────────────────
 function afficherTableau(rows){
-  const cfg  = CFG[typeActif];
-  const tbl  = document.getElementById('tbl');
-  const vide = document.getElementById('vide');
-  const cpt  = document.getElementById('cpt');
-
-  if(rows.length === 0){
-    tbl.style.display  = 'none';
-    vide.style.display = 'block';
-    vide.innerHTML     = '<div class="vide-i">🔍</div><p>Aucune déclaration trouvée<br>pour cette période.</p>';
-    cpt.textContent    = '';
-    return;
+  const cfg=CFG[typeActif];
+  const tbl=document.getElementById('tbl');
+  const vide=document.getElementById('vide');
+  const cpt=document.getElementById('cpt');
+  if(rows.length===0){
+    tbl.style.display='none'; vide.style.display='block';
+    vide.innerHTML='<div class="vide-i">🔍</div><p>Aucune déclaration trouvée<br>pour cette période.</p>';
+    cpt.textContent=''; return;
   }
-  vide.style.display = 'none';
-  tbl.style.display  = 'table';
-
-  // EN-TÊTES
-  document.getElementById('thead').innerHTML = '<tr>' +
-    cfg.cols.map((c,i) => {
-      const k = cfg.keys[i];
-      const actif = k===sortKey?' tri-actif':'';
-      const ico   = k===sortKey?(sortAsc?'▲':'▼'):'↕';
-      return `<th class="${actif}" onclick="trier('${k}')">${c}<span class="si">${ico}</span></th>`;
-    }).join('') + '</tr>';
-
-  // LIGNES
-  document.getElementById('tbody').innerHTML = rows.map(r => {
-    let cls = '';
-    if(typeActif==='casse'    && r.jetees  >= 10) cls = 'alerte';
-    if(typeActif==='transfert'&& r.feuilles>= 50) cls = 'info';
-
-    const tds = cfg.keys.map((k,i) => {
-      const v   = r[k] !== undefined ? r[k] : '—';
-      const num = cfg.nums.includes(k);
-      let aff   = v;
-
-      // Badge feuilles jetées
-      if(typeActif==='casse' && k==='jetees'){
-        const cl = v>=10?'br':v>=5?'ba':'bv2';
-        aff = `<span class="bdg ${cl}">${v}</span>`;
+  vide.style.display='none'; tbl.style.display='table';
+  document.getElementById('thead').innerHTML='<tr>'+
+    cfg.cols.map((c,i)=>{
+      const k=cfg.keys[i];
+      const a=k===sortKey?' tri-actif':'';
+      const ic=k===sortKey?(sortAsc?'▲':'▼'):'↕';
+      return `<th class="${a}" onclick="trier('${k}')">${c}<span class="si">${ic}</span></th>`;
+    }).join('')+'</tr>';
+  document.getElementById('tbody').innerHTML=rows.map(r=>{
+    let cls='';
+    if(typeActif==='casse'&&r.jetees>=10) cls='alerte';
+    if(typeActif==='transfert'&&r.feuilles>=50) cls='info';
+    const tds=cfg.keys.map((k)=>{
+      const v=r[k]!==undefined?r[k]:'—';
+      const num=cfg.nums.includes(k);
+      let aff=v;
+      if(typeActif==='casse'&&k==='jetees'){
+        const cl=v>=10?'br':v>=5?'ba':'bv2';
+        aff=`<span class="bdg ${cl}">${v}</span>`;
       }
       return `<td${num?' class="r"':''}>${aff}</td>`;
     }).join('');
     return `<tr class="${cls}">${tds}</tr>`;
   }).join('');
-
-  cpt.textContent = rows.length===1 ? '1 déclaration affichée' : `${rows.length} déclarations affichées`;
+  cpt.textContent=rows.length===1?'1 déclaration affichée':`${rows.length} déclarations affichées`;
 }
 
-// ═══════════════════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════════════════
+// ── STATS ────────────────────────────────────────────────────
 function afficherStats(rows){
-  const el = document.getElementById('stats');
+  const el=document.getElementById('stats');
   if(rows.length===0){el.style.display='none';return;}
-
   let items=[];
   if(typeActif==='casse'){
-    const tj = rows.reduce((s,r)=>s+r.jetees,0);
-    const tr = rows.reduce((s,r)=>s+r.restantes,0);
-    const tt = rows.reduce((s,r)=>s+r.total,0);
-    const tx = tt>0?(tj/tt*100).toFixed(1):0;
-    items = [
-      {v:rows.length, l:'Caisses'},
-      {v:tj,          l:'Feuilles jetées'},
-      {v:tr,          l:'Restantes'},
-      {v:tx+'%',      l:'Taux casse'},
-    ];
+    const tj=rows.reduce((s,r)=>s+r.jetees,0);
+    const tr=rows.reduce((s,r)=>s+r.restantes,0);
+    const tt=rows.reduce((s,r)=>s+r.total,0);
+    items=[{v:rows.length,l:'Caisses'},{v:tj,l:'Jetées'},{v:tr,l:'Restantes'},{v:tt>0?(tj/tt*100).toFixed(1)+'%':0,l:'Taux casse'}];
   } else if(typeActif==='vente'){
-    const tf = rows.reduce((s,r)=>s+r.feuilles,0);
-    const clients = [...new Set(rows.map(r=>r.client))].length;
-    items = [
-      {v:rows.length, l:'Lignes'},
-      {v:tf,          l:'Feuilles sorties'},
-      {v:clients,     l:'Clients'},
-    ];
+    const tf=rows.reduce((s,r)=>s+r.feuilles,0);
+    items=[{v:rows.length,l:'Lignes'},{v:tf,l:'Feuilles'},{v:[...new Set(rows.map(r=>r.client))].length,l:'Clients'}];
   } else {
-    const tf = rows.reduce((s,r)=>s+r.feuilles,0);
-    const dests = [...new Set(rows.map(r=>r.destination))].length;
-    items = [
-      {v:rows.length, l:'Transferts'},
-      {v:tf,          l:'Feuilles'},
-      {v:dests,       l:'Destinations'},
-    ];
+    const tf=rows.reduce((s,r)=>s+r.feuilles,0);
+    items=[{v:rows.length,l:'Transferts'},{v:tf,l:'Feuilles'},{v:[...new Set(rows.map(r=>r.destination))].length,l:'Dests'}];
   }
-  el.style.display = 'flex';
-  el.innerHTML = items.map(i=>`<div class="sc"><div class="sv">${i.v}</div><div class="sl">${i.l}</div></div>`).join('');
+  el.style.display='flex';
+  el.innerHTML=items.map(i=>`<div class="sc"><div class="sv">${i.v}</div><div class="sl">${i.l}</div></div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════
-// TRI
-// ═══════════════════════════════════════════════════════
+// ── TRI ──────────────────────────────────────────────────────
 function trier(key){
-  if(sortKey===key) sortAsc=!sortAsc; else {sortKey=key;sortAsc=true;}
-  const nums = CFG[typeActif].nums;
+  if(sortKey===key) sortAsc=!sortAsc; else{sortKey=key;sortAsc=true;}
+  const nums=CFG[typeActif].nums;
   dfAffiche.sort((a,b)=>{
-    let va=a[key], vb=b[key];
+    let va=a[key],vb=b[key];
     if(nums.includes(key)){va=+va;vb=+vb;}
     else{va=String(va).toLowerCase();vb=String(vb).toLowerCase();}
     return va<vb?(sortAsc?-1:1):va>vb?(sortAsc?1:-1):0;
@@ -468,36 +526,154 @@ function trier(key){
   afficherTableau(dfAffiche);
 }
 
-// ═══════════════════════════════════════════════════════
-// EXPORT PDF
-// ═══════════════════════════════════════════════════════
-function ouvrirModalPDF(){
-  if(dfAffiche.length===0){toast('⚠️ Aucune donnée à exporter');return;}
-  document.getElementById('overlay').classList.add('vis');
-}
-function fermerModal(e){
-  if(!e||e.target===document.getElementById('overlay'))
-    document.getElementById('overlay').classList.remove('vis');
-}
-function imprimerPDF(){
-  document.getElementById('overlay').classList.remove('vis');
-  const lbl = LABELS[typeActif];
-  const per = document.getElementById('sel-periode');
-  const perTxt = per.options[per.selectedIndex].text;
-  document.getElementById('pdf-titre').textContent = `${lbl.emoji} ${lbl.nom} — GPS Benicarlò`;
-  document.getElementById('pdf-sous-titre').textContent =
-    `Période : ${perTxt} · ${dfAffiche.length} déclaration(s) · Généré le ${new Date().toLocaleDateString('fr-FR')}`;
-  setTimeout(()=>window.print(), 200);
+// ════════════════════════════════════════════════════════════
+//  BOUTON EXPORT — TOGGLE
+// ════════════════════════════════════════════════════════════
+
+/** Ouvre/ferme le menu déroulant du bouton rouge */
+function toggleMenuExport(){
+  if(dfAffiche.length===0){
+    toast('⚠️ Générez d\'abord un tableau',true);
+    return;
+  }
+  menuOuvert=!menuOuvert;
+  const btn=document.getElementById('btn-export');
+  const menu=document.getElementById('export-menu');
+  // Toggle visuel du bouton
+  btn.classList.toggle('actif',menuOuvert);
+  // Toggle du menu déroulant
+  menu.classList.toggle('vis',menuOuvert);
 }
 
-// ═══════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════
-function toast(msg){
+/** Ferme le menu sans rien faire */
+function fermerMenuExport(){
+  menuOuvert=false;
+  document.getElementById('btn-export').classList.remove('actif');
+  document.getElementById('export-menu').classList.remove('vis');
+}
+
+// ════════════════════════════════════════════════════════════
+//  EXPORT EXCEL — SheetJS
+// ════════════════════════════════════════════════════════════
+function exporterExcel(){
+  fermerMenuExport();
+  if(typeof XLSX==='undefined'){toast('⚠️ Bibliothèque Excel non chargée',true);return;}
+
+  const cfg  = CFG[typeActif];
+  const lbl  = LABELS[typeActif];
+  const date = new Date().toLocaleDateString('fr-FR');
+
+  // Construire les données pour SheetJS
+  const entetes = cfg.cols;
+  const lignes  = dfAffiche.map(r => cfg.keys.map(k => r[k]!==undefined?r[k]:''));
+
+  // Créer la feuille
+  const ws = XLSX.utils.aoa_to_sheet([entetes, ...lignes]);
+
+  // Style largeur colonnes auto
+  ws['!cols'] = entetes.map((_,i)=>({
+    wch: Math.max(entetes[i].length, ...lignes.map(l=>String(l[i]).length)) + 2
+  }));
+
+  // Créer le classeur
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, lbl.nom.slice(0,31));
+
+  // Télécharger
+  const nomFichier = `declarations_${typeActif}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, nomFichier);
+  toast('✅ Fichier Excel téléchargé !');
+}
+
+// ════════════════════════════════════════════════════════════
+//  EXPORT PDF — jsPDF + AutoTable
+// ════════════════════════════════════════════════════════════
+function exporterPDF(){
+  fermerMenuExport();
+  if(typeof window.jspdf==='undefined'||typeof window.jspdf.jsPDF==='undefined'){
+    toast('⚠️ Bibliothèque PDF non chargée',true);return;
+  }
+
+  const {jsPDF}  = window.jspdf;
+  const cfg      = CFG[typeActif];
+  const lbl      = LABELS[typeActif];
+  const per      = document.getElementById('sel-periode');
+  const perTxt   = per.options[per.selectedIndex].text;
+  const dateAuj  = new Date().toLocaleDateString('fr-FR');
+
+  // Créer le document PDF en mode paysage
+  const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+
+  // ── En-tête du PDF ─────────────────────────────────────────
+  doc.setFillColor(13, 33, 55);            // couleur surface2
+  doc.rect(0, 0, 297, 22, 'F');
+  doc.setTextColor(91, 196, 217);          // cyan
+  doc.setFontSize(14);
+  doc.setFont('helvetica','bold');
+  doc.text(`${lbl.emoji} ${lbl.nom} — GPS Benicarlò`, 14, 14);
+  doc.setTextColor(180,180,180);
+  doc.setFontSize(8);
+  doc.setFont('helvetica','normal');
+  doc.text(`Période : ${perTxt}   |   ${dfAffiche.length} déclaration(s)   |   Généré le ${dateAuj}`, 14, 20);
+
+  // ── Tableau ────────────────────────────────────────────────
+  doc.autoTable({
+    startY: 26,
+    head: [cfg.cols],
+    body: dfAffiche.map(r => cfg.keys.map(k => r[k]!==undefined?r[k]:'')),
+    styles:{fontSize:8,cellPadding:3,textColor:[236,240,241],fillColor:[15,25,35]},
+    headStyles:{fillColor:[30,111,168],textColor:255,fontStyle:'bold',fontSize:9},
+    alternateRowStyles:{fillColor:[26,37,53]},
+    // Coloration rouge pour lignes alerte (casse >= 10)
+    didParseCell: (data) => {
+      if(typeActif==='casse' && data.row.index>=0 && data.section==='body'){
+        const row = dfAffiche[data.row.index];
+        if(row && row.jetees>=10){
+          data.cell.styles.fillColor=[45,16,16];
+          data.cell.styles.textColor=[255,107,107];
+        }
+      }
+    },
+    margin:{left:14,right:14},
+  });
+
+  // ── Pied de page ───────────────────────────────────────────
+  const pages = doc.internal.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);
+    doc.setTextColor(120,120,120);
+    doc.setFontSize(7);
+    doc.text(`Page ${i}/${pages}  —  GPS Benicarlò  —  tafatkhaled901@gmail.com`,
+      doc.internal.pageSize.width/2, doc.internal.pageSize.height-5, {align:'center'});
+  }
+
+  // Télécharger
+  const nomFichier=`declarations_${typeActif}_${new Date().toISOString().slice(0,10)}.pdf`;
+  doc.save(nomFichier);
+  toast('✅ Fichier PDF téléchargé !');
+}
+
+// ════════════════════════════════════════════════════════════
+//  IMPRESSION PDF — window.print()
+// ════════════════════════════════════════════════════════════
+function imprimerPDF(){
+  fermerMenuExport();
+  const lbl    = LABELS[typeActif];
+  const per    = document.getElementById('sel-periode');
+  const perTxt = per.options[per.selectedIndex].text;
+  document.getElementById('pdf-titre').textContent =
+    `${lbl.emoji} ${lbl.nom} — GPS Benicarlò`;
+  document.getElementById('pdf-sous-titre').textContent =
+    `Période : ${perTxt} · ${dfAffiche.length} déclaration(s) · Généré le ${new Date().toLocaleDateString('fr-FR')}`;
+  setTimeout(()=>window.print(), 250);
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function toast(msg, erreur=false){
   const t=document.getElementById('toast');
   t.textContent=msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
+  t.className='toast show'+(erreur?' erreur':'');
+  setTimeout(()=>t.classList.remove('show'),3200);
 }
 </script>
 </body>
